@@ -188,6 +188,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // Network operations must not be running in the main thread.
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ttSocketChannel.main();
+            }
+        }).start();
+
         Button btnLogin = (Button) findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -293,13 +301,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Network operations must not be running in the main thread.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ttSocketChannel.main();
-            }
-        }).start();
+
 
 
     }
