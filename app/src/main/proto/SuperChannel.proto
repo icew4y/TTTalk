@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package com.protobuf.protos;
+option java_package = "com.protobuf.protos";
+option java_multiple_files = true;
+option objc_class_prefix = "GPB";
+
+//pack:{
+//  "1": {},
+//  "2": {
+//    "6": "3617290138456438837"
+//  },
+//  "3": "1",
+//  "5": "100"
+//}
+
+//fixed proto
+
+//pack:{
+//  "1": {},
+//  "2": "158887230",
+//  "3": "1",
+//  "5": "100"
+//}
+
+message requestSuperChannelSearch{
+  unknown_obj1 ub1 = 1;
+  bytes keyWord = 2;
+  int32 unknown3 = 3;
+  int32 unknown4 = 4;
+  message unknown_obj1{
+
+  }
+}
+
+
+message responseSuperChannelSearch{
+  errInfo err = 1;
+  bytes keyWord = 2;
+
+
+  message errInfo{
+    int32 errcode = 1;
+    bytes errinfo = 2;
+    searchResp searchres = 3;
+  }
+
+  //{
+  //  "1": {
+  //    "1": "0",
+  //    "2": "bytearray(b'OK')",
+  //    "3": "0",
+  //    "5": {},
+  //    "6": "0"
+  //  },
+  //  "2":"158887232",
+  //  "3": {
+  //    "1": {
+  //      "1": "164351339",
+  //      "2": "bytearray(b'\\xe5\\xa4\\x84\\xe5\\xaf\\xb9\\xe8\\xb1\\xa1\\xe8\\xbf\\x9b')",
+  //      "3": "1",
+  //      "4": "164351339",
+  //      "5": "0",
+  //      "6": "0",
+  //      "7": "158887232",
+  //      "8": "3",
+  //      "9": "0",
+  //      "10": {},
+  //      "11": {}
+  //    },
+  //    "2": "297214753",
+  //    "3": "bytearray(b'tt694718832')",
+  //    "4": "0",
+  //    "5": "3",
+  //    "6": "0",
+  //    "7": "3",
+  //    "8": "bytearray(b'\\xe5\\xa5\\xa5\\xe5\\x88\\xa9\\xe7\\xbb\\x99')",
+  //    "9": "297214753",
+  //    "10": "1",
+  //    "11": "0",
+  //    "12": "0",
+  //    "13": "0",
+  //    "14": "0",
+  //    "15": "0",
+  //    "16": "1",
+  //    "17": "0",
+  //    "18": "0",
+  //    "19": {},
+  //    "20": "0"
+  //  },
+  //  "4": {
+  //    "1": {},
+  //    "2": {},
+  //    "3": "0",
+  //    "4": "0",
+  //    "5": {},
+  //    "6": "0",
+  //    "7": {},
+  //    "8": {},
+  //    "9": "164351339"
+  //  },
+  //  "5": "0",
+  //  "6": "0",
+  //  "7": "1"
+  //}
+  message searchResp{
+    ChannelInfo channelInfo = 1;
+    bytes ownerName = 8;
+    message ChannelInfo{
+      int64 roomId = 1;
+      bytes roomName = 2;
+    }
+  }
+}

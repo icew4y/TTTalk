@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package com.protobuf.protos;
+option java_package = "com.protobuf.protos";
+option java_multiple_files = true;
+option objc_class_prefix = "GPB";
+
+message ErrInfo{
+  int32 errcode = 1;
+  bytes errinfo = 2;
+}
+
+
+message EnterChannelRequest{
+  unknown_obj1 ub1 = 1;
+  int64 roomId = 2;
+
+  unknown_obj3 ub3 = 3;
+  int64 displayRoomId = 5;
+  int32 unknown_int7 = 7;
+
+  message unknown_obj1{
+
+  }
+
+  message unknown_obj3{
+    int32 unknown_int1 = 1;
+  }
+}
+message EnterChannelResponse{
+    ErrInfo error = 1;
+}
+
+
+
