@@ -3,7 +3,6 @@ import android.util.Log;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.protobuf.protos.EnterChannelResponse;
-import com.protobuf.protos.Info;
 import com.protobuf.protos.LoginResp;
 import com.yiyou.ga.net.protocol.PByteArray;
 import com.yiyou.ga.net.protocol.YProtocol;
@@ -123,27 +122,32 @@ public class TTSocketChannel {
                         case 10:{//Auto Login Response
                             MessageBody messageBody = new MessageBody(byteBuffer0);
                             MessageContent messageContent = messageBody.unpack_body();
-                            LoginResp loginResp = LoginResp.parseFrom(messageContent.getBytes());
-                            Info info = loginResp.getInfo();
-
-                            int uid = info.getUserId();
-                            String sessionKey = info.getSessionKey().toStringUtf8();
-                            long timestamp = info.getTimestamp();
-                            String authToken = info.getAuthToken().toStringUtf8();
-                            Log.d(TAG, "uid:" + uid + ", sessionKey:" + sessionKey + ", timestamp:" + timestamp + ", authToken:" + authToken);
-                            YProtocol.setUid(uid);
-                            YProtocol.native_setSessionKey(sessionKey);
-                            YProtocol.initAuthToken(uid, timestamp, authToken);
                             String s = ByteHexStr.bytetoHexString_(messageContent.getBytes());
-                            System.out.println(s);
+                            LoginResp loginResp = LoginResp.parseFrom(messageContent.getBytes());
+                            if (loginResp.getErrInfo().getErrCode() == 0){
+                                LoginResp.AuthInfo authInfo = loginResp.getAuthInfo();
 
-                            //although I don't know which request is effective to the server
-                            //but if missing these packets below, enterChannel won't work
-                            this.test_cmd74();
-                            this.test_cmd31200();
-                            this.test_cmd30330();
-                            this.test_cmd3580();
-                            this.test_cmd401();
+                                int uid = authInfo.getUserId();
+                                String sessionKey = authInfo.getSessionKey().toStringUtf8();
+                                long timestamp = authInfo.getTimestamp();
+                                String authToken = authInfo.getAuthToken().toStringUtf8();
+                                Log.d(TAG, "uid:" + uid + ", sessionKey:" + sessionKey + ", timestamp:" + timestamp + ", authToken:" + authToken);
+                                YProtocol.setUid(uid);
+                                YProtocol.native_setSessionKey(sessionKey);
+                                YProtocol.initAuthToken(uid, timestamp, authToken);
+                                System.out.println(s);
+
+                                //although I don't know which request is effective to the server
+                                //but if missing these packets below, enterChannel won't work
+                                this.test_cmd74();
+                                this.test_cmd31200();
+                                this.test_cmd30330();
+                                this.test_cmd3580();
+                                this.test_cmd401();
+                            }else{
+                                Log.d(TAG, "Login failed! errCode:" + loginResp.getErrInfo().getErrCode() + ", errMsg:" + loginResp.getErrInfo().getErrMsg().toStringUtf8());
+                            }
+
 
                             break;
                         }

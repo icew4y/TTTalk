@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.protobuf.ByteString;
+import com.protobuf.protos.AutoLogin;
 import com.protobuf.protos.ChatMessage;
 import com.protobuf.protos.ChatMessageOrBuilder;
 import com.protobuf.protos.EnterChannelRequest;
@@ -47,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
     public TTSocketChannel ttSocketChannel = new TTSocketChannel();
 
     public String DeviceId = "";
+
+    //store in shared_prefs/pref_outside_share_info.xml
+    public String key_web_ua = "Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt";
+    //shared_prefs/BUGLY_COMMON_VALUES.xml
+    public String androidid = "fbddc0a64a19b097";
 
     public static byte[] pack_header(int cmd, int seq, short unknown, byte[] byteArray) {
         int msglen = byteArray.length;
@@ -160,6 +166,8 @@ public class MainActivity extends AppCompatActivity {
         boolean ret = YProtocol.native_init(getApplication(), true);
         System.out.println("native_init:" + ret);
 
+
+        //DeviceId can be found in "shared_prefs/preference_new_deivce_id.xml"
         ret = YProtocol.native_setDeviceId("17b6d6731ed4f34acc0d0d8cdc202b88");
         ret = YProtocol.native_setClientVersion(101318657);
                 // make sure the app has the permissions, it won't get the correct device id otherwise
@@ -168,6 +176,8 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("native_TT_e(deviceId):" + deviceId);
 
         // I guess this is a key that is used to encrypt the session
+        // sessionKey can be found in "shared_prefs/auth.xml"
+        // also userName
         YProtocol.native_setSessionKey("555f6144739d62894deff36b0d0b62ec");
         //YProtocol.setUid(290440381);
 
@@ -204,9 +214,40 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         // Auto login package
-                        byte[] data = ByteHexStr.hexToByteArray("0a091a002a038201003200120b31333538303539303632301a203535356636313434373339643632383934646566663336623064306236326563200328015a0231306207416e64726f69646a12414f5350206f6e2063726f737368617463689a01086f6666696369616caa01086f6666696369616cb201e1010a0012006ada0122c5014d6f7a696c6c612f352e3020284c696e75783b20416e64726f69642031303b20414f5350206f6e2063726f73736861746368204275696c642f515031412e3139303731312e3032303b20777629204170706c655765624b69742f3533372e333620284b48544d4c2c206c696b65204765636b6f292056657273696f6e2f342e30204368726f6d652f37342e302e333732392e313836204d6f62696c65205361666172692f3533372e333620545456657273696f6e2f362e31302e3120545446726f6d2f7474321066626464633061363461313962303937");
+                        //byte[] data = ByteHexStr.hexToByteArray("0a091a002a038201003200120b31333538303539303632301a203535356636313434373339643632383934646566663336623064306236326563200328015a0231306207416e64726f69646a12414f5350206f6e2063726f737368617463689a01086f6666696369616caa01086f6666696369616cb201e1010a0012006ada0122c5014d6f7a696c6c612f352e3020284c696e75783b20416e64726f69642031303b20414f5350206f6e2063726f73736861746368204275696c642f515031412e3139303731312e3032303b20777629204170706c655765624b69742f3533372e333620284b48544d4c2c206c696b65204765636b6f292056657273696f6e2f342e30204368726f6d652f37342e302e333732392e313836204d6f62696c65205361666172692f3533372e333620545456657273696f6e2f362e31302e3120545446726f6d2f7474321066626464633061363461313962303937");
+                        AutoLogin.Builder autoLoginBuilder = AutoLogin.newBuilder();
+                        autoLoginBuilder
+                                .setBaseReq(
+                                        AutoLogin.BaseReq.newBuilder()
+                                                .setUobj3(AutoLogin.BaseReq.Unkobj3.newBuilder().build())
+                                                .setUobj5(AutoLogin.BaseReq.Unkobj5.newBuilder()
+                                                        .setUobj16(AutoLogin.BaseReq.Unkobj5.Unkobj16.newBuilder().build())
+                                                        .build())
+                                                .setUobj6(AutoLogin.BaseReq.Unkobj6.newBuilder().build()))
+                                .setUserName(ByteString.copyFromUtf8("13580590620"))
+                                .setSessionKey(ByteString.copyFromUtf8("555f6144739d62894deff36b0d0b62ec"))
+                                .setLoginType(3)
+                                .setAccType(1)
+                                .setSystemVer(ByteString.copyFromUtf8("10"))
+                                .setSystem(ByteString.copyFromUtf8("Android"))
+                                .setModel(ByteString.copyFromUtf8("AOSP on crosshatch"))
+                                .setItChannel(ByteString.copyFromUtf8("official"))
+                                .setDisChn(ByteString.copyFromUtf8("official"))
+                                .setExtraInfo(
+                                        AutoLogin.ExtraInfo.newBuilder()
+                                                .setUnkobj1(AutoLogin.ExtraInfo.Unkobj1.newBuilder().build())
+                                                .setLotteryInfo(AutoLogin.ExtraInfo.LotteryInfo.newBuilder().build())
+                                                .setExtraDeviceIds(
+                                                        AutoLogin.ExtraInfo.ExtraDeviceIds.newBuilder()
+                                                                .setUserAgent(ByteString.copyFromUtf8(key_web_ua))
+                                                                .setAndroidId(ByteString.copyFromUtf8(androidid))
+                                                )
+                                );
+
+                        AutoLogin autoLogin = autoLoginBuilder.build();
+                        String t = ByteHexStr.bytetoHexString_(autoLogin.toByteArray());
                         PByteArray outByteArray = new PByteArray();
-                        boolean ret = YProtocol.pack(10, data, outByteArray, true, 0);
+                        boolean ret = YProtocol.pack(10, autoLogin.toByteArray(), outByteArray, true, 0);
                         String packed = ByteHexStr.bytetoHexString_(outByteArray.value);
                         System.out.println(packed);
                         byte[] pack_header_bytes = MainActivity.pack_header(10, 2, (short) 0, outByteArray.value);

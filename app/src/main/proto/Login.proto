@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package com.protobuf.protos;
+option java_package = "com.protobuf.protos";
+option java_multiple_files = true;
+option objc_class_prefix = "GPB";
+
+
+
+
+//{
+//  "1": {
+//    "1": "0",
+//    "2": {},
+//    "7": "bytearray(b'86dc98bd882a82cf1b08965a25a9cb92')"
+//  },
+//  "2": {
+//    "2": "296475024",
+//    "3": "bytearray(b'iceway')",
+//    "4": "bytearray(b'13580590620')",
+//    "5": "0",
+//    "6": "0",
+//    "7": "bytearray(b'40f1f90bd2925a259052ae01a8897cef')",
+//    "9": "0",
+//    "10": "1",
+//    "11": {},
+//    "12": "bytearray(b'tt315639854')",
+//    "13": {},
+//    "14": {},
+//    "15": "0",
+//    "16": "1",
+//    "17": "bytearray(b'28053207215238')",
+//    "18": "0",
+//    "19": "bytearray(b'315639854')",
+//    "20": "0",
+//    "21": "bytearray(b'i8m3lz89N5AGghEJC5n_cFIZ9QamW4U28Oxgdj7r:z3a-qeJVNuE9kAVsn25xXJx673g=:eyJzY29wZSI6ImdhLWFsYnVtIiwiZGVhZGxpbmUiOjE2NjkwMzgyNzJ9')",
+//    "22": "30",
+//    "23": "1",
+//    "24": "1",
+//    "26": "bytearray(b'8GDCVU')",
+//    "27": "0",
+//    "28": "bytearray(b'1c6d761c19754e26f6599936298ae0ed')",
+//    "29": "1669037672077",
+//    "30": "0",
+//    "31": "0",
+//    "32": "0",
+//    "33": "bytearray(b'iceway')",
+//    "35": "1667717039",
+//    "36": "0",
+//    "37": "0",
+//    "38": "bytearray(b'eyJhbGciOiAiSFM1MTIiLCAidHlwIjogIkpXUyJ9.eyJleHAiOiAxNjY5MDM4NTcyLCAiaWF0IjogMTY2OTAzNzY3MiwgImlzcyI6ICI1MnR0LmNvbSIsICJzZXNzIjogIiIsICJzdWIiOiAidHQzMTU2Mzk4NTQiLCAidGVybSI6IDExMTQxMTIsICJ0eXAiOiAxLCAidWlkIjogMjk2NDc1MDI0fQ.ZxNfkK6BCwnIlSS4DBLKzUjqhTcHPE7pM-tUIDKo2scu5t3_HYuyT53vt0yc_skbJtCe0l4_wKfxcqh9B5e03w')",
+//    "39": "bytearray(b'59.34.190.234')",
+//    "40": "0",
+//    "42": {},
+//    "43": "0",
+//    "44": "bytearray(b'eyJhbGciOiJFUzI1NiIsImtpZCI6IkVqV1oyc29lNkk0QndOS2FzMEZscDQ0M2NsMlFOTmpOSXBlclFVQS1zbUUifQ.eyJjbGllbnRfdHlwZSI6MCwiZGV2aWNlX2lkIjoiRjdiV2N4N1U4MHJNRFEyTTNDQXJpQT09IiwiZXhwIjoxNjY5MDQ0ODcyLCJleHRyYSI6eyJjbGllbnRfaXAiOiI1OS4zNC4xOTAuMjM0In0sImlhdCI6MTY2OTAzNzY3MiwiaXNzIjoiaHR0cHM6Ly9hcGkuNTJ0dC5jb20iLCJqdGkiOiIzYjJ5NTZnYm96Nm8iLCJzY29wZXMiOm51bGwsInN1YiI6IjI5NjQ3NTAyNCIsInRlcm1pbmFsX3R5cGUiOjExMTQxMTJ9.5xOXBowfOQ7_lyg604VJ5NKfGuiW2h_zF1uXfR8rAF15fE1wXuW85iDYSySAIbh57XYxHim6rli6iuWFpeS5cQ')",
+//    "45": {
+//      "1": {
+//        "1": "bytearray(b'apiv2.52tt.com:443')",
+//        "2": {
+//          "1": "1",
+//          "2": {}
+//        }
+//      },
+//      "2": "1669044872",
+//      "3": {}
+//    }
+//  },
+//  "3": "3",
+//  "4": "1",
+//  "5": "bytearray(b'555f6144739d62894deff36b0d0b62ec')"
+//}
+message LoginResp{
+	ErrInfo errInfo = 1;
+	AuthInfo authInfo = 2;
+	int32 loginType = 3;//3 = Auto Login
+	int32 accType = 4;
+
+	message ErrInfo{
+		int32 errCode = 1;
+		bytes errMsg = 2;
+	}
+	message AuthInfo{
+		int32 userId = 2;
+		bytes nickName = 3;
+		bytes acc = 4;
+		bytes sessionKey = 7;
+		bytes account = 12;
+		int32 guildid = 15;
+		bytes loginkey = 17;
+		bytes AuthToken = 28;
+		int64 timestamp = 29;
+		bool simplePwd = 40;
+		bytes ttUnionToken = 44;
+	}
+}
+
+
+//{
+//  "1": {
+//    "3": {},
+//    "5": {
+//      "16": {}
+//    },
+//    "6": {}
+//  },
+//  "2": "bytearray(b'13580590620')",
+//  "3": "bytearray(b'555f6144739d62894deff36b0d0b62ec')",
+//  "4": "3",
+//  "5": "1",
+//  "11": "bytearray(b'10')",
+//  "12": "bytearray(b'Android')",
+//  "13": "bytearray(b'AOSP on crosshatch')",
+//  "19": "bytearray(b'official')",
+//  "21": "bytearray(b'official')",
+//  "22": {
+//    "1": {},
+//    "2": {},
+//    "13": {
+//      "4": "bytearray(b'Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt')",
+//      "6": "bytearray(b'fbddc0a64a19b097')"
+//    }
+//  }
+//}
+message AutoLogin{
+	BaseReq baseReq = 1;
+	bytes userName = 2;
+	bytes sessionKey = 3;
+	int32 loginType = 4;//3 = Auto Login
+	int32 acc_type = 5;//1
+	bytes systemVer = 11;
+	bytes system = 12;
+	bytes model = 13;
+	bytes itChannel = 19;
+	bytes dis_chn = 21;
+	ExtraInfo extraInfo = 22;
+
+	message BaseReq{
+		Unkobj3 uobj3 = 3;
+		Unkobj5 uobj5 = 5;
+		Unkobj6 uobj6 = 6;
+		message Unkobj3{
+		}
+		message Unkobj5{
+			Unkobj16 uobj16 = 16;
+			message Unkobj16{
+			}
+		}
+		message Unkobj6{
+		}
+	}
+
+	message ExtraInfo{
+		Unkobj1 unkobj1 = 1;
+		LotteryInfo lotteryInfo = 2;
+		ExtraDeviceIds extraDeviceIds = 13;
+
+		message Unkobj1{
+		}
+		message LotteryInfo{
+		}
+		message ExtraDeviceIds{
+			bytes userAgent = 4;
+			bytes androidId = 6;
+		}
+	}
+}
