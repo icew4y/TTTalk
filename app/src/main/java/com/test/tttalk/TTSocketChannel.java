@@ -3,6 +3,7 @@ import android.util.Log;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.protobuf.protos.EnterChannelResponse;
+import com.protobuf.protos.FollowUserResp;
 import com.protobuf.protos.LoginResp;
 import com.yiyou.ga.net.protocol.PByteArray;
 import com.yiyou.ga.net.protocol.YProtocol;
@@ -22,7 +23,7 @@ public class TTSocketChannel {
     private static String TAG = "TTSocketChannel";
 
 
-    private int seq = 4;
+    public static int seq = 4;
     private SocketChannel channel;
     private Selector selector;
     private boolean finishConnect = false;
@@ -124,7 +125,7 @@ public class TTSocketChannel {
                             MessageContent messageContent = messageBody.unpack_body();
                             String s = ByteHexStr.bytetoHexString_(messageContent.getBytes());
                             LoginResp loginResp = LoginResp.parseFrom(messageContent.getBytes());
-                            if (loginResp.getErrInfo().getErrCode() == 0){
+                            if (loginResp.getBaseResp().getErrCode() == 0){
                                 LoginResp.AuthInfo authInfo = loginResp.getAuthInfo();
 
                                 int uid = authInfo.getUserId();
@@ -145,7 +146,7 @@ public class TTSocketChannel {
                                 this.test_cmd3580();
                                 this.test_cmd401();
                             }else{
-                                Log.d(TAG, "Login failed! errCode:" + loginResp.getErrInfo().getErrCode() + ", errMsg:" + loginResp.getErrInfo().getErrMsg().toStringUtf8());
+                                Log.d(TAG, "Login failed! errCode:" + loginResp.getBaseResp().getErrCode() + ", errMsg:" + loginResp.getBaseResp().getErrMsg().toStringUtf8());
                             }
 
 
@@ -165,6 +166,18 @@ public class TTSocketChannel {
                             MessageContent messageContent = messageBody.unpack_body();
                             String s = ByteHexStr.bytetoHexString_(messageContent.getBytes());
                             System.out.println(s);
+                            break;
+                        }
+                        case 2562:{
+                            MessageBody messageBody = new MessageBody(byteBuffer0);
+                            MessageContent messageContent = messageBody.unpack_body();
+                            FollowUserResp followUserResp = FollowUserResp.parseFrom(messageContent.getBytes());
+                            if (followUserResp.getBaseResp().getErrCode() == 0) {
+                                Log.d(TAG, "follow User successfully! followed User Id:" + followUserResp.getFollowedUserId());
+                            }else{
+                                Log.d(TAG, "followUser failed! errCode:" + followUserResp.getBaseResp().getErrCode() + ", errMsg:" + followUserResp.getBaseResp().getErrMsg().toStringUtf8());
+                            }
+//
                             break;
                         }
                         case 6:{//unknown

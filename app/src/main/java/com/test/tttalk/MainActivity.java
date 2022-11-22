@@ -16,7 +16,9 @@ import com.google.protobuf.ByteString;
 import com.protobuf.protos.AutoLogin;
 import com.protobuf.protos.ChatMessage;
 import com.protobuf.protos.ChatMessageOrBuilder;
+import com.protobuf.protos.DeviceInfo;
 import com.protobuf.protos.EnterChannelRequest;
+import com.protobuf.protos.FollowUser;
 import com.protobuf.protos.requestSuperChannelSearch;
 import com.test.tttalk.databinding.ActivityMainBinding;
 import com.yiyou.ga.net.protocol.PByteArray;
@@ -243,16 +245,12 @@ public class MainActivity extends AppCompatActivity {
                                                                 .setAndroidId(ByteString.copyFromUtf8(androidid))
                                                 )
                                 );
-
+                        TTSocketChannel.seq ++;
                         AutoLogin autoLogin = autoLoginBuilder.build();
                         String t = ByteHexStr.bytetoHexString_(autoLogin.toByteArray());
                         PByteArray outByteArray = new PByteArray();
                         boolean ret = YProtocol.pack(10, autoLogin.toByteArray(), outByteArray, true, 0);
-                        String packed = ByteHexStr.bytetoHexString_(outByteArray.value);
-                        System.out.println(packed);
-                        byte[] pack_header_bytes = MainActivity.pack_header(10, 2, (short) 0, outByteArray.value);
-                        String packed2 = ByteHexStr.bytetoHexString_(pack_header_bytes);
-                        System.out.println(packed2);
+                        byte[] pack_header_bytes = MainActivity.pack_header(10, TTSocketChannel.seq, (short) 0, outByteArray.value);
                         ByteBuffer byteBuffer = ByteBuffer.wrap(pack_header_bytes);
                         ttSocketChannel.write(byteBuffer);
                     }
@@ -276,6 +274,7 @@ public class MainActivity extends AppCompatActivity {
 //                                .setUnknown3(1)
 //                                .setUnknown4(100).build();
 
+                        TTSocketChannel.seq ++;
                         EnterChannelRequest enterChannelRequest = EnterChannelRequest.newBuilder().setUb1(EnterChannelRequest.unknown_obj1.newBuilder())
                                 .setRoomId(164351337)
                                 .setUb3(EnterChannelRequest.unknown_obj3.newBuilder().setUnknownInt1(3))
@@ -285,11 +284,7 @@ public class MainActivity extends AppCompatActivity {
                         String t = ByteHexStr.bytetoHexString_(enterChannelRequest.toByteArray());
                         PByteArray outByteArray = new PByteArray();
                         boolean ret = YProtocol.pack(423, enterChannelRequest.toByteArray(), outByteArray, false, 0);
-                        String packed = ByteHexStr.bytetoHexString_(outByteArray.value);
-                        System.out.println(packed);
-                        byte[] pack_header_bytes = MainActivity.pack_header(423, 4, (short) 0, outByteArray.value);
-                        String packed2 = ByteHexStr.bytetoHexString_(pack_header_bytes);
-                        System.out.println(packed2);
+                        byte[] pack_header_bytes = MainActivity.pack_header(423, TTSocketChannel.seq, (short) 0, outByteArray.value);
                         ByteBuffer byteBuffer = ByteBuffer.wrap(pack_header_bytes);
                         ttSocketChannel.write(byteBuffer);
                     }
@@ -312,6 +307,65 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button btnFollow = (Button) findViewById(R.id.btnFollow);
+        btnFollow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TTSocketChannel.seq ++;
+                        try {
+                            String followUserAccount = "tt317892845";
+                            String displayID = "158887230";
+                            String channelID = "164351337";
+                            int channelType = 3;
+                            JSONObject customSource = new JSONObject();
+                            customSource.put("tagname", "王者荣耀");
+                            customSource.put("channel_theme", "");
+                            customSource.put("channel_prefecture", "0");
+                            FollowUser.Builder followUserBuilder = FollowUser.newBuilder()
+                                    .setUobj1(FollowUser.Unkobj1.newBuilder().build())
+                                    .setUserIdentifier(
+                                            FollowUser.UserIdentifier.newBuilder()
+                                                    .setAccount(ByteString.copyFromUtf8(followUserAccount))
+                                                    .build()
+                                    )
+                                    .setSource(4)
+                                    .setCustomSource(ByteString.copyFromUtf8(customSource.toString()))
+                                    .addDatacenterContextInfo(
+                                            FollowUser.DatacenterContextInfo.newBuilder()
+                                                    .setKey(ByteString.copyFromUtf8("displayID"))
+                                                    .setValue(ByteString.copyFromUtf8(displayID))
+                                                    .build()
+                                    )
+                                    .addDatacenterContextInfo(
+                                            FollowUser.DatacenterContextInfo.newBuilder()
+                                                    .setKey(ByteString.copyFromUtf8("channelID"))
+                                                    .setValue(ByteString.copyFromUtf8(channelID))
+                                                    .build()
+                                    )
+                                    .setChannelId(Long.valueOf(channelID))
+                                    .setChannelType(channelType);
+
+                            //byte[] data = ByteHexStr.hexToByteArray("0a00120d120b7474333137383932383435180422467b227461676e616d65223a22e78e8be88085e88da3e88080222c226368616e6e656c5f7468656d65223a22222c226368616e6e656c5f70726566656374757265223a2230227d32160a09646973706c61794944120931353838383732333032160a096368616e6e656c4944120931363433353133333738e99aaf4e4003");
+
+                            FollowUser followUser = followUserBuilder.build();
+                            String t = ByteHexStr.bytetoHexString_(followUser.toByteArray());
+                            PByteArray outByteArray = new PByteArray();
+                            boolean ret = YProtocol.pack(2562, followUser.toByteArray(), outByteArray, false, 0);
+                            byte[] pack_header_bytes = MainActivity.pack_header(2562, TTSocketChannel.seq, (short) 0, outByteArray.value);
+                            ByteBuffer byteBuffer = ByteBuffer.wrap(pack_header_bytes);
+                            ttSocketChannel.write(byteBuffer);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
+
+            }
+        });
+
 
         Button btnChatText = (Button) findViewById(R.id.btnChatText);
         btnChatText.setOnClickListener(new View.OnClickListener() {
@@ -320,9 +374,9 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        ChatMessage.DeviceInfo.Builder builder = ChatMessage.DeviceInfo.newBuilder().setDevicesm(
-                                ChatMessage.DeviceInfo.DeviceShumei.newBuilder().setDeviceId(
-                                        ChatMessage.DeviceInfo.DeviceShumei.DeviceId.newBuilder().setDeviceIdStr(ByteString.copyFrom(
+                        DeviceInfo.Builder builder = DeviceInfo.newBuilder().setDevicesm(
+                                DeviceInfo.DeviceShumei.newBuilder().setDeviceId(
+                                        DeviceInfo.DeviceShumei.DeviceId.newBuilder().setDeviceIdStr(ByteString.copyFrom(
                                                 MainActivity.this.DeviceId.getBytes(StandardCharsets.UTF_8)
                                         ))
                                 )

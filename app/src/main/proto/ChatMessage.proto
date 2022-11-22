@@ -19,7 +19,15 @@ option objc_class_prefix = "GPB";
 //  "5": "1"
 //}
 
-
+message DeviceInfo{
+    DeviceShumei devicesm = 5;
+    message DeviceShumei{
+        DeviceId deviceId = 2;
+        message DeviceId{
+            bytes deviceIdStr = 1;
+        }
+    }
+}
 
 
 
@@ -30,13 +38,38 @@ message ChatMessage{
     int32 unknown4 = 4;
     int32 unknown5 = 5;
 
-    message DeviceInfo{
-        DeviceShumei devicesm = 5;
-        message DeviceShumei{
-            DeviceId deviceId = 2;
-            message DeviceId{
-                bytes deviceIdStr = 1;
-            }
-        }
-    }
+
+}
+
+//applog:ChattingActivity, VisibleItem:4,msg:m
+// {si=0, ci=3, ti=0, fAc='tt315639854', tAc='tt317892845', fN='', tN='', c='ttttttttt', ty=1, sat='', bat='', atDes=null, sT=0,
+// cI=1669091190, st=0, sST=1, sK='28058552556222', f=0, h=0, reT=0, label=0, source8}
+
+//{
+//  "1": {
+//    "5": {
+//      "2": {
+//        "1": "bytearray(b'BhLZ0QNzk/REcq8aq9StkvdqgdfCrdF205zOcgkJSkLOBEF3rG7miEjwA/NYkWUI95t1vYSxIb3xoiZrOZSBa0g==')"
+//      }
+//    }
+//  },
+//  "2": "bytearray(b'tt317892845')",
+//  "3": "1",
+//  "4": "bytearray(b'ttttttttt')",
+//  "5": "3",
+//  "6": "1669091190",
+//  "8": "0",
+//  "9": "bytearray(b'28058552556222')",
+//  "10": "1",
+//  "12": "8"
+//}
+message Greeting{
+    DeviceInfo deviceInfo = 1;
+    bytes toAccount = 2;
+    int64 messageType = 3;
+    bytes content = 4;
+    int32 ci = 5;
+    int64 clientTime = 6;
+    int32 unknown8 = 8;
+    bytes loginKey = 9; // from the login response
 }

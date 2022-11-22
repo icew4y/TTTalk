@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package com.protobuf.protos;
+option java_package = "com.protobuf.protos";
+option java_multiple_files = true;
+option objc_class_prefix = "GPB";
+
+//applog:FriendshipRequestService, followUser: userIdentifier a: 2
+//b: "tt317892845"
+//account: "tt317892845"
+//, source 4, customSource {"tagname":"王者荣耀","channel_theme":"","channel_prefecture":"0"}, channelId 164351337, channelType 3, datacenterContextInfo {displayID=158887230, channelID=164351337}
+
+//{
+//  "1": {},
+//  "2": {
+//    "2": "bytearray(b'tt317892845')"
+//  },
+//  "3": "4",
+//  "4": "bytearray(b'{\"tagname\":\"\王者荣耀\",\"channel_theme\":\"\",\"channel_prefecture\":\"0\"}')",
+//  "6": [
+//    {
+//      "1": "bytearray(b'displayID')",
+//      "2": "bytearray('158887230')"
+//    },
+//    {
+//      "1": "bytearray(b'channelID')",
+//      "2": "bytearray('164351337')"
+//    }
+//  ],
+//  "7": "164351337",
+//  "8": "3"
+//}
+message FollowUser{
+  Unkobj1 uobj1 = 1;
+  UserIdentifier userIdentifier = 2;
+  int32 source = 3;
+  bytes customSource = 4;
+  repeated DatacenterContextInfo datacenterContextInfo = 6;
+  int64 channelId = 7;
+  int32 channelType = 8;
+
+
+  message DatacenterContextInfo{
+    bytes key = 1;
+    bytes value = 2;
+  }
+  message UserIdentifier{
+    bytes account = 2;
+  }
+  message Unkobj1{
+
+  }
+}
+
+message FollowUserResp{
+  BaseResp baseResp = 1;
+  int64 followedUserId = 2;
+  message BaseResp{
+    int32 errCode = 1;
+    bytes errMsg = 2;
+  }
+}
+

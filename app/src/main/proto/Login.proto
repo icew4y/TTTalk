@@ -71,12 +71,12 @@ option objc_class_prefix = "GPB";
 //  "5": "bytearray(b'555f6144739d62894deff36b0d0b62ec')"
 //}
 message LoginResp{
-	ErrInfo errInfo = 1;
+	BaseResp baseResp = 1;
 	AuthInfo authInfo = 2;
 	int32 loginType = 3;//3 = Auto Login
 	int32 accType = 4;
 
-	message ErrInfo{
+	message BaseResp{
 		int32 errCode = 1;
 		bytes errMsg = 2;
 	}
