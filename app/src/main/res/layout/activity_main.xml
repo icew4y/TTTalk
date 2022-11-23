@@ -45,4 +45,12 @@
         android:text="关注"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnChatText" />
+
+    <Button
+        android:id="@+id/btnGreets"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="打招呼"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnFollow" />
 </androidx.constraintlayout.widget.ConstraintLayout>

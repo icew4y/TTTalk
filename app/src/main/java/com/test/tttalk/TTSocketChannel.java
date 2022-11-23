@@ -1,9 +1,15 @@
 package com.test.tttalk;
 import android.util.Log;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.protobuf.protos.ChatMessageResp;
+import com.protobuf.protos.CheckSyncKey;
+import com.protobuf.protos.CheckSyncKeyResp;
 import com.protobuf.protos.EnterChannelResponse;
 import com.protobuf.protos.FollowUserResp;
+import com.protobuf.protos.GreetingResp;
+import com.protobuf.protos.LeaveChannelResponse;
 import com.protobuf.protos.LoginResp;
 import com.yiyou.ga.net.protocol.PByteArray;
 import com.yiyou.ga.net.protocol.YProtocol;
@@ -28,13 +34,21 @@ public class TTSocketChannel {
     private Selector selector;
     private boolean finishConnect = false;
 
-    public void test_cmd74() {
+    public void CheckSyncKey() {
         this.seq ++;
-        int cmd = 74;
-        byte[] data = ByteHexStr.hexToByteArray("0a0020012a06362e31302e3130f37e3a086f6666696369616c");
+        CheckSyncKey.Builder syncKeyBuilder = CheckSyncKey.newBuilder()
+                .setUnkobj1(CheckSyncKey.Unknown1.newBuilder().build())
+                .setUnknown4(1)
+                .setVersion(ByteString.copyFromUtf8("6.10.1"))
+                .setVersionCode(16243)
+                .setOfficial(ByteString.copyFromUtf8("official"));
+
+        CheckSyncKey checkSyncKey = syncKeyBuilder.build();
+
+        //byte[] data = ByteHexStr.hexToByteArray("0a0020012a06362e31302e3130f37e3a086f6666696369616c");
         PByteArray outByteArray = new PByteArray();
-        boolean ret = YProtocol.pack(cmd, data, outByteArray, false, 0);
-        byte[] pack_header_bytes = MainActivity.pack_header(cmd, this.seq, (short) 0, outByteArray.value);
+        boolean ret = YProtocol.pack(Commands.cmd_check_sync_key, checkSyncKey.toByteArray(), outByteArray, false, 0);
+        byte[] pack_header_bytes = MainActivity.pack_header(Commands.cmd_check_sync_key, this.seq, (short) 0, outByteArray.value);
         ByteBuffer byteBuffer = ByteBuffer.wrap(pack_header_bytes);
         this.write(byteBuffer);
     }
@@ -62,7 +76,7 @@ public class TTSocketChannel {
     }
     public void chat_text(byte[] chatBytes){
         this.seq ++;
-        int cmd = 434;
+        int cmd = Commands.cmd_public_chat;
         //byte[] data = ByteHexStr.hexToByteArray(chatBytes);
         PByteArray outByteArray = new PByteArray();
         boolean ret = YProtocol.pack(cmd, chatBytes, outByteArray, false, 0);
@@ -120,7 +134,7 @@ public class TTSocketChannel {
                     ByteBuffer byteBuffer0 = ByteBuffer.wrap(arr_b);
                     System.out.println("cmd:" + this.msghead.cmd + ", bodylen:" + this.bodylen);
                     switch (this.msghead.cmd){
-                        case 10:{//Auto Login Response
+                        case Commands.cmd_auto_login:{//Auto Login Response
                             MessageBody messageBody = new MessageBody(byteBuffer0);
                             MessageContent messageContent = messageBody.unpack_body();
                             String s = ByteHexStr.bytetoHexString_(messageContent.getBytes());
@@ -132,19 +146,21 @@ public class TTSocketChannel {
                                 String sessionKey = authInfo.getSessionKey().toStringUtf8();
                                 long timestamp = authInfo.getTimestamp();
                                 String authToken = authInfo.getAuthToken().toStringUtf8();
-                                Log.d(TAG, "uid:" + uid + ", sessionKey:" + sessionKey + ", timestamp:" + timestamp + ", authToken:" + authToken);
+                                MainActivity.loginKey = authInfo.getLoginkey().toStringUtf8();
+                                Log.d(TAG, "Login successfully! uid:" + uid + ", sessionKey:" + sessionKey + ", timestamp:" + timestamp + ", authToken:" + authToken);
                                 YProtocol.setUid(uid);
                                 YProtocol.native_setSessionKey(sessionKey);
                                 YProtocol.initAuthToken(uid, timestamp, authToken);
                                 System.out.println(s);
 
-                                //although I don't know which request is effective to the server
-                                //but if missing these packets below, enterChannel won't work
-                                this.test_cmd74();
-                                this.test_cmd31200();
-                                this.test_cmd30330();
-                                this.test_cmd3580();
-                                this.test_cmd401();
+
+                                //Sync the keys and tokens, even though I still have no idea
+                                //what are these items used for, but it's better than doing nothing.
+                                this.CheckSyncKey();
+//                                this.test_cmd31200();
+//                                this.test_cmd30330();
+//                                this.test_cmd3580();
+//                                this.test_cmd401();
                             }else{
                                 Log.d(TAG, "Login failed! errCode:" + loginResp.getBaseResp().getErrCode() + ", errMsg:" + loginResp.getBaseResp().getErrMsg().toStringUtf8());
                             }
@@ -152,23 +168,52 @@ public class TTSocketChannel {
 
                             break;
                         }
-                        case 423:{//OnEnterChannel
+                        case Commands.cmd_enter_channel:{//OnEnterChannel
                             MessageBody messageBody = new MessageBody(byteBuffer0);
                             MessageContent messageContent = messageBody.unpack_body();
 
                             EnterChannelResponse enterChannelResponse = EnterChannelResponse.parseFrom(messageContent.getBytes());
 
-                            System.out.println("OnEnterChannel:" + enterChannelResponse.getError().getErrcode() + ", " +
-                                    enterChannelResponse.getError().getErrinfo().toStringUtf8());
+                            if (enterChannelResponse.getBaseResp().getErrCode() == 0) {
+                                Log.d(TAG, "enterChannel successfully! ");
+                            }else{
+                                Log.d(TAG, "enterChannel failed! errCode:" + enterChannelResponse.getBaseResp().getErrCode() + ", errMsg:" + enterChannelResponse.getBaseResp().getErrMsg().toStringUtf8());
+                            }
                             break;
-                        }case 74:{//unknown
+                        }case Commands.cmd_check_sync_key:{//unknown
                             MessageBody messageBody = new MessageBody(byteBuffer0);
-                            MessageContent messageContent = messageBody.unpack_body();
-                            String s = ByteHexStr.bytetoHexString_(messageContent.getBytes());
-                            System.out.println(s);
+                            byte[] messageContent = messageBody.unpack_body().getBytes();
+                            CheckSyncKeyResp checkSyncKeyResp = CheckSyncKeyResp.parseFrom(messageContent);
+                            if (checkSyncKeyResp.getBaseResp().getErrCode() == 0) {
+                                Log.d(TAG, "CheckSyncKey successfully! ");
+                            }else{
+                                Log.d(TAG, "CheckSyncKey failed! errCode:" + checkSyncKeyResp.getBaseResp().getErrCode() + ", errMsg:" + checkSyncKeyResp.getBaseResp().getErrMsg().toStringUtf8());
+                            }
                             break;
                         }
-                        case 2562:{
+                        case Commands.cmd_public_chat:{
+                            MessageBody messageBody = new MessageBody(byteBuffer0);
+                            byte[] messageContent = messageBody.unpack_body().getBytes();
+                            ChatMessageResp chatMessageResp = ChatMessageResp.parseFrom(messageContent);
+                            if (chatMessageResp.getBaseResp().getErrCode() == 0) {
+                                Log.d(TAG, "ChatMessage message sent successfully! ");
+                            }else{
+                                Log.d(TAG, "ChatMessage message sent failed! errCode:" + chatMessageResp.getBaseResp().getErrCode() + ", errMsg:" + chatMessageResp.getBaseResp().getErrMsg().toStringUtf8());
+                            }
+                            break;
+                        }
+                        case Commands.cmd_leave_channel:{
+                            MessageBody messageBody = new MessageBody(byteBuffer0);
+                            MessageContent messageContent = messageBody.unpack_body();
+                            LeaveChannelResponse leaveChannelResponse = LeaveChannelResponse.parseFrom(messageContent.getBytes());
+                            if (leaveChannelResponse.getBaseResp().getErrCode() == 0) {
+                                Log.d(TAG, "leaveChannelResponse successfully!");
+                            }else{
+                                Log.d(TAG, "leaveChannelResponse failed! errCode:" + leaveChannelResponse.getBaseResp().getErrCode() + ", errMsg:" + leaveChannelResponse.getBaseResp().getErrMsg().toStringUtf8());
+                            }
+                            break;
+                        }
+                        case Commands.cmd_follow_user:{
                             MessageBody messageBody = new MessageBody(byteBuffer0);
                             MessageContent messageContent = messageBody.unpack_body();
                             FollowUserResp followUserResp = FollowUserResp.parseFrom(messageContent.getBytes());
@@ -178,6 +223,17 @@ public class TTSocketChannel {
                                 Log.d(TAG, "followUser failed! errCode:" + followUserResp.getBaseResp().getErrCode() + ", errMsg:" + followUserResp.getBaseResp().getErrMsg().toStringUtf8());
                             }
 //
+                            break;
+                        }
+                        case Commands.cmd_greetings:{
+                            MessageBody messageBody = new MessageBody(byteBuffer0);
+                            byte[] messageContent = messageBody.unpack_body().getBytes();
+                            GreetingResp greetingResp = GreetingResp.parseFrom(messageContent);
+                            if (greetingResp.getBaseResp().getErrCode() == 0) {
+                                Log.d(TAG, "Greetings message sent successfully! ");
+                            }else{
+                                Log.d(TAG, "Greetings message sent failed! errCode:" + greetingResp.getBaseResp().getErrCode() + ", errMsg:" + greetingResp.getBaseResp().getErrMsg().toStringUtf8());
+                            }
                             break;
                         }
                         case 6:{//unknown

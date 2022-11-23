@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package com.protobuf.protos;
 option java_package = "com.protobuf.protos";
@@ -20,11 +20,11 @@ option objc_class_prefix = "GPB";
 //}
 
 message DeviceInfo{
-    DeviceShumei devicesm = 5;
+    optional DeviceShumei devicesm = 5;
     message DeviceShumei{
-        DeviceId deviceId = 2;
+        optional DeviceId deviceId = 2;
         message DeviceId{
-            bytes deviceIdStr = 1;
+            optional bytes deviceIdStr = 1;
         }
     }
 }
@@ -32,13 +32,19 @@ message DeviceInfo{
 
 
 message ChatMessage{
-    DeviceInfo deviceInfo = 1;
-    int64 roomRealId = 2;
-    bytes textMessage = 3;
-    int32 unknown4 = 4;
-    int32 unknown5 = 5;
+    optional DeviceInfo deviceInfo = 1;
+    optional int64 roomRealId = 2;
+    optional bytes textMessage = 3;
+    optional int32 unknown4 = 4;
+    optional int32 unknown5 = 5;
+}
 
-
+message ChatMessageResp{
+    optional BaseResp baseResp = 1;
+    message BaseResp{
+        optional int32 errCode = 1;
+        optional bytes errMsg = 2;
+    }
 }
 
 //applog:ChattingActivity, VisibleItem:4,msg:m
@@ -64,12 +70,23 @@ message ChatMessage{
 //  "12": "8"
 //}
 message Greeting{
-    DeviceInfo deviceInfo = 1;
-    bytes toAccount = 2;
-    int64 messageType = 3;
-    bytes content = 4;
-    int32 ci = 5;
-    int64 clientTime = 6;
-    int32 unknown8 = 8;
-    bytes loginKey = 9; // from the login response
+    optional DeviceInfo deviceInfo = 1;
+    optional bytes toAccount = 2;
+    optional int64 messageType = 3;
+    optional bytes content = 4;
+    optional int32 ci = 5;
+    optional int64 clientTime = 6;
+    optional int32 unknown8 = 8;
+    optional bytes loginKey = 9; // from the login response
+    optional int32 unknown10 = 10;
+    optional int32 unkonwn12 = 12;
+}
+
+
+message GreetingResp{
+    optional BaseResp baseResp = 1;
+    message BaseResp{
+        optional int32 errCode = 1;
+        optional bytes errMsg = 2;
+    }
 }

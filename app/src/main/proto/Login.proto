@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package com.protobuf.protos;
 option java_package = "com.protobuf.protos";
@@ -71,27 +71,27 @@ option objc_class_prefix = "GPB";
 //  "5": "bytearray(b'555f6144739d62894deff36b0d0b62ec')"
 //}
 message LoginResp{
-	BaseResp baseResp = 1;
-	AuthInfo authInfo = 2;
-	int32 loginType = 3;//3 = Auto Login
-	int32 accType = 4;
+	optional BaseResp baseResp = 1;
+	optional AuthInfo authInfo = 2;
+	optional int32 loginType = 3;//3 = Auto Login
+	optional int32 accType = 4;
 
 	message BaseResp{
-		int32 errCode = 1;
-		bytes errMsg = 2;
+		optional int32 errCode = 1;
+		optional bytes errMsg = 2;
 	}
 	message AuthInfo{
-		int32 userId = 2;
-		bytes nickName = 3;
-		bytes acc = 4;
-		bytes sessionKey = 7;
-		bytes account = 12;
-		int32 guildid = 15;
-		bytes loginkey = 17;
-		bytes AuthToken = 28;
-		int64 timestamp = 29;
-		bool simplePwd = 40;
-		bytes ttUnionToken = 44;
+		optional int32 userId = 2;
+		optional bytes nickName = 3;
+		optional bytes acc = 4;
+		optional bytes sessionKey = 7;
+		optional bytes account = 12;
+		optional int32 guildid = 15;
+		optional bytes loginkey = 17;
+		optional bytes AuthToken = 28;
+		optional int64 timestamp = 29;
+		optional bool simplePwd = 40;
+		optional bytes ttUnionToken = 44;
 	}
 }
 
@@ -123,26 +123,26 @@ message LoginResp{
 //  }
 //}
 message AutoLogin{
-	BaseReq baseReq = 1;
-	bytes userName = 2;
-	bytes sessionKey = 3;
-	int32 loginType = 4;//3 = Auto Login
-	int32 acc_type = 5;//1
-	bytes systemVer = 11;
-	bytes system = 12;
-	bytes model = 13;
-	bytes itChannel = 19;
-	bytes dis_chn = 21;
-	ExtraInfo extraInfo = 22;
+	optional BaseReq baseReq = 1;
+	optional bytes userName = 2;
+	optional bytes sessionKey = 3;
+	optional int32 loginType = 4;//3 = Auto Login
+	optional int32 acc_type = 5;//1
+	optional bytes systemVer = 11;
+	optional bytes system = 12;
+	optional bytes model = 13;
+	optional bytes itChannel = 19;
+	optional bytes dis_chn = 21;
+	optional ExtraInfo extraInfo = 22;
 
 	message BaseReq{
-		Unkobj3 uobj3 = 3;
-		Unkobj5 uobj5 = 5;
-		Unkobj6 uobj6 = 6;
+		optional Unkobj3 uobj3 = 3;
+		optional Unkobj5 uobj5 = 5;
+		optional Unkobj6 uobj6 = 6;
 		message Unkobj3{
 		}
 		message Unkobj5{
-			Unkobj16 uobj16 = 16;
+			optional Unkobj16 uobj16 = 16;
 			message Unkobj16{
 			}
 		}
@@ -151,17 +151,140 @@ message AutoLogin{
 	}
 
 	message ExtraInfo{
-		Unkobj1 unkobj1 = 1;
-		LotteryInfo lotteryInfo = 2;
-		ExtraDeviceIds extraDeviceIds = 13;
+		optional Unkobj1 unkobj1 = 1;
+		optional LotteryInfo lotteryInfo = 2;
+		optional ExtraDeviceIds extraDeviceIds = 13;
 
 		message Unkobj1{
 		}
 		message LotteryInfo{
 		}
 		message ExtraDeviceIds{
-			bytes userAgent = 4;
-			bytes androidId = 6;
+			optional bytes userAgent = 4;
+			optional bytes androidId = 6;
 		}
+	}
+}
+
+//{
+//  "1": {},
+//  "4": "1",
+//  "5": "bytearray(b'6.10.1')",
+//  "6": "16243",
+//  "7": "bytearray(b'official')"
+//}
+message CheckSyncKey{
+	optional Unknown1 unkobj1 = 1;
+	optional int32 unknown4 = 4;
+	optional bytes version = 5;
+	optional int32 versionCode = 6;
+	optional bytes official = 7;
+	message Unknown1{
+
+	}
+}
+
+
+//{
+//  "1": {
+//    "1": "0",
+//    "2": {},
+//    "7": "bytearray(b'04c1aa3f836b656ceb887ef5ed13b31e')"
+//  },
+//  "2": [
+//    {
+//      "1": "11",
+//      "2": "37"
+//    },
+//    {
+//      "1": "2",
+//      "2": "6"
+//    },
+//    {
+//      "1": "6",
+//      "2": "10"
+//    },
+//    {
+//      "1": "15",
+//      "2": "2"
+//    },
+//    {
+//      "1": "16",
+//      "2": "0"
+//    },
+//    {
+//      "1": "7",
+//      "2": "1667217203"
+//    },
+//    {
+//      "1": "8",
+//      "2": "1430668502"
+//    },
+//    {
+//      "1": "10",
+//      "2": "0"
+//    },
+//    {
+//      "1": "14",
+//      "2": "1669034637"
+//    },
+//    {
+//      "1": "15",
+//      "2": "2"
+//    }
+//  ],
+//  "3": "0",
+//  "4": "bytearray(b'i8m3lz89N5AGghEJC5n_cFIZ9QamW4U28Oxgdj7r:jMXgE2cYouAQ5AuA5EhVgEMlbN8=:eyJzY29wZSI6ImdhLWFsYnVtIiwiZGVhZGxpbmUiOjE2NjkwOTE3MjV9')",
+//  "6": "bytearray(b'6.11.0_16267')",
+//  "7": "1",
+//  "8": "1",
+//  "9": "1590656595",
+//  "10": "1669091125",
+//  "12": "15",
+//  "16": "16267",
+//  "17": "bytearray(b'i8m3lz89N5AGghEJC5n_cFIZ9QamW4U28Oxgdj7r:nUyMsom4RnRofKJbniB5Iy6_wMk=:eyJzY29wZSI6InR0LWNyYXNoLWxvZ3MtYW5kcm9pZCIsImRlYWRsaW5lIjoxNjY5MDkxNzI1fQ==')",
+//  "18": "bytearray(b'i8m3lz89N5AGghEJC5n_cFIZ9QamW4U28Oxgdj7r:jMXgE2cYouAQ5AuA5EhVgEMlbN8=:eyJzY29wZSI6ImdhLWFsYnVtIiwiZGVhZGxpbmUiOjE2NjkwOTE3MjV9')",
+//  "19": "bytearray(b'eyJhbGciOiAiSFM1MTIiLCAidHlwIjogIkpXUyJ9.eyJleHAiOiAxNjY5MDkyMDI1LCAiaWF0IjogMTY2OTA5MTEyNSwgImlzcyI6ICI1MnR0LmNvbSIsICJzZXNzIjogIiIsICJzdWIiOiAidHQzMTU2Mzk4NTQiLCAidGVybSI6IDExMTQxMTIsICJ0eXAiOiAxLCAidWlkIjogMjk2NDc1MDI0fQ.0e7Y2pxhY-EQlt2mY5kbT7_b4k_z-pNUNOBXxoAwjxq-Us6PdQkO5DVZ5D5nGegpFAzoZOaahNOZ32LUtjJ54w')",
+//  "20": {
+//    "1": {
+//      "1": "bytearray(b'apiv2.52tt.com:443')",
+//      "2": {
+//        "1": "1",
+//        "2": {}
+//      }
+//    },
+//    "2": "1669098325",
+//    "3": {}
+//  }
+//}
+
+message CheckSyncKeyResp{
+	optional BaseResp baseResp = 1;
+	message BaseResp{
+		optional int32 errCode = 1;
+		optional bytes errMsg = 2;
+	}
+	repeated SyncKeyList syncKeyList = 2;
+	optional int32 guildId = 3;//guildId
+	optional bytes token = 4;
+	optional bytes version = 6;
+	optional int32 gameCircleCfgUpdate = 7;
+	optional int32 rootAlertCfgUpdate = 8;
+	optional int32 gCfgUpdate = 9;
+	optional int32 srvTimeSync = 10;
+	optional int32 versionCode = 16;//16267
+	optional bytes crashLogToken = 17;
+	optional bytes unknownToken = 18;
+	optional bytes webSecureToken = 19;
+	optional ExpireAt expireAt = 20;
+
+
+	message SyncKeyList{
+		optional int32 syncType = 1;
+		optional int32 key = 2;
+	}
+
+	message ExpireAt{
+		optional int32 expireAt = 2;
 	}
 }

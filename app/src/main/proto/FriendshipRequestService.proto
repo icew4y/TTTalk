@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package com.protobuf.protos;
 option java_package = "com.protobuf.protos";
@@ -31,21 +31,21 @@ option objc_class_prefix = "GPB";
 //  "8": "3"
 //}
 message FollowUser{
-  Unkobj1 uobj1 = 1;
-  UserIdentifier userIdentifier = 2;
-  int32 source = 3;
-  bytes customSource = 4;
+  optional Unkobj1 uobj1 = 1;
+  optional UserIdentifier userIdentifier = 2;
+  optional int32 source = 3;
+  optional bytes customSource = 4;
   repeated DatacenterContextInfo datacenterContextInfo = 6;
-  int64 channelId = 7;
-  int32 channelType = 8;
+  optional int64 channelId = 7;
+  optional int32 channelType = 8;
 
 
   message DatacenterContextInfo{
-    bytes key = 1;
-    bytes value = 2;
+    optional bytes key = 1;
+    optional bytes value = 2;
   }
   message UserIdentifier{
-    bytes account = 2;
+    optional bytes account = 2;
   }
   message Unkobj1{
 
@@ -53,11 +53,11 @@ message FollowUser{
 }
 
 message FollowUserResp{
-  BaseResp baseResp = 1;
-  int64 followedUserId = 2;
+  optional BaseResp baseResp = 1;
+  optional int64 followedUserId = 2;
   message BaseResp{
-    int32 errCode = 1;
-    bytes errMsg = 2;
+    optional int32 errCode = 1;
+    optional bytes errMsg = 2;
   }
 }
 
