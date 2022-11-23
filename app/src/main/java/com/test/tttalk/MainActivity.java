@@ -55,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     //store in shared_prefs/pref_outside_share_info.xml
     public String key_web_ua = "Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt";
     //shared_prefs/BUGLY_COMMON_VALUES.xml
+    //android have no effect to login action, no matter what it's given
+    //even by a random string, Auto login still works
     public String androidid = "fbddc0a64a19b097";
 
     public static String loginKey = "";
@@ -239,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
                                 .setAccType(1)
                                 .setSystemVer(ByteString.copyFromUtf8("10"))
                                 .setSystem(ByteString.copyFromUtf8("Android"))
-                                .setModel(ByteString.copyFromUtf8("AOSP on crosshatch"))
+                                .setModel(ByteString.copyFromUtf8("Google Pixel 3 XL"))
                                 .setItChannel(ByteString.copyFromUtf8("official"))
                                 .setDisChn(ByteString.copyFromUtf8("official"))
                                 .setExtraInfo(
