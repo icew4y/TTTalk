@@ -341,9 +341,9 @@ public class MainActivity extends AppCompatActivity {
 
                         TTSocketChannel.seq++;
                         String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-
                         if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
-                            Toast.makeText(getApplication(), "ChannelId doesn't exist in the channelIds!" + channelStr, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplication(), "ChannelId doesn't exist in the channelIds!" + channelStr, Toast.LENGTH_LONG);
+                            return;
                         }
                         Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
 
@@ -376,9 +376,9 @@ public class MainActivity extends AppCompatActivity {
                         TTSocketChannel.seq++;
 
                         String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-
                         if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
                             Toast.makeText(getApplication(), "ChannelId doesn't exist in the channelIds!" + channelStr, Toast.LENGTH_LONG);
+                            return;
                         }
                         Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
 
@@ -409,8 +409,15 @@ public class MainActivity extends AppCompatActivity {
                         TTSocketChannel.seq++;
                         try {
                             String followUserAccount = "tt317892845";
-                            String displayID = "158887230";
-                            String channelID = "164351337";
+                            //String displayID = "158887230";
+                            //String channelID = "164351337";
+                            String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                            if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
+                                Toast.makeText(getApplication(), "ChannelId doesn't exist in the channelIds!" + channelStr, Toast.LENGTH_LONG);
+                                return;
+                            }
+                            Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
+
                             int channelType = 3;
                             JSONObject customSource = new JSONObject();
                             customSource.put("tagname", "王者荣耀");
@@ -428,16 +435,16 @@ public class MainActivity extends AppCompatActivity {
                                     .addDatacenterContextInfo(
                                             FollowUser.DatacenterContextInfo.newBuilder()
                                                     .setKey(ByteString.copyFromUtf8("displayID"))
-                                                    .setValue(ByteString.copyFromUtf8(displayID))
+                                                    .setValue(ByteString.copyFromUtf8(channelStr))
                                                     .build()
                                     )
                                     .addDatacenterContextInfo(
                                             FollowUser.DatacenterContextInfo.newBuilder()
                                                     .setKey(ByteString.copyFromUtf8("channelID"))
-                                                    .setValue(ByteString.copyFromUtf8(channelID))
+                                                    .setValue(ByteString.copyFromUtf8(String.valueOf(realChannelId)))
                                                     .build()
                                     )
-                                    .setChannelId(Long.valueOf(channelID))
+                                    .setChannelId(realChannelId)
                                     .setChannelType(channelType);
 
                             //byte[] data = ByteHexStr.hexToByteArray("0a00120d120b7474333137383932383435180422467b227461676e616d65223a22e78e8be88085e88da3e88080222c226368616e6e656c5f7468656d65223a22222c226368616e6e656c5f70726566656374757265223a2230227d32160a09646973706c61794944120931353838383732333032160a096368616e6e656c4944120931363433353133333738e99aaf4e4003");
@@ -466,6 +473,14 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+
+                        String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                        if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
+                            Toast.makeText(getApplication(), "ChannelId doesn't exist in the channelIds!" + channelStr, Toast.LENGTH_LONG);
+                            return;
+                        }
+                        Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
+
                         DeviceInfo.Builder builder = DeviceInfo.newBuilder().setDevicesm(
                                 DeviceInfo.DeviceShumei.newBuilder().setDeviceId(
                                         DeviceInfo.DeviceShumei.DeviceId.newBuilder().setDeviceIdStr(ByteString.copyFrom(
@@ -475,7 +490,7 @@ public class MainActivity extends AppCompatActivity {
                         );
                         ChatMessage.Builder chatMessageBuilder = ChatMessage.newBuilder()
                                 .setDeviceInfo(builder.build())
-                                .setRoomRealId(164351337)
+                                .setRoomRealId(realChannelId)
                                 .setTextMessage(ByteString.copyFrom("你好".getBytes(StandardCharsets.UTF_8)))
                                 .setUnknown4(1)
                                 .setUnknown5(1);
