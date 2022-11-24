@@ -15,42 +15,65 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnEnterChannel"
+        android:id="@+id/btnGreets"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="进入房间"
+        android:layout_marginTop="8dp"
+        android:text="打招呼"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
+        app:layout_constraintTop_toBottomOf="@+id/btnFollow" />
 
     <Button
         android:id="@+id/btnLeaveRoom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="退出房间"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnEnterChannel" />
 
     <Button
-        android:id="@+id/btnChatText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="文字消息"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnLeaveRoom" />
-
-    <Button
         android:id="@+id/btnFollow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="关注"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnChatText" />
 
     <Button
-        android:id="@+id/btnGreets"
+        android:id="@+id/btnChatText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="打招呼"
+        android:layout_marginTop="4dp"
+        android:text="文字消息"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnFollow" />
+        app:layout_constraintTop_toBottomOf="@+id/btnLeaveRoom" />
+
+    <Button
+        android:id="@+id/btnEnterChannel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:text="进入房间"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
+
+    <Button
+        android:id="@+id/btnSearchChannel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="搜索房间"
+        app:layout_constraintBottom_toTopOf="@+id/btnEnterChannel"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <EditText
+        android:id="@+id/edtChannelSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="158887230"
+        app:layout_constraintStart_toEndOf="@+id/btnSearchChannel"
+        tools:layout_editor_absoluteY="48dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -27,7 +27,7 @@ message RequestSuperChannelSearch{
   optional UnknownObj1 unkobj1 = 1;
   optional bytes keyWord = 2;
   optional int32 unknown3 = 3;
-  optional int32 unknown4 = 4;
+  optional int32 unknown5 = 5;
   message UnknownObj1{
 
   }
@@ -94,16 +94,13 @@ message RequestSuperChannelSearch{
 //}
 message ResponseSuperChannelSearch{
   optional BaseResp baseResp = 1;
-
   optional bytes keyWord = 2;
+  optional SearchResp searchResp = 3;
 
   message BaseResp{
     optional int32 errCode = 1;
     optional bytes errMsg = 2;
   }
-
-  optional SearchResp searchResp = 3;
-
 
   message SearchResp{
     optional ChannelInfo channelInfo = 1;
@@ -113,6 +110,7 @@ message ResponseSuperChannelSearch{
     message ChannelInfo{
       optional int64 channelId = 1;
       optional bytes channelName = 2;
+      optional int64 displayId = 7;
     }
   }
 }

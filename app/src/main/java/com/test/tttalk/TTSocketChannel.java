@@ -11,6 +11,8 @@ import com.protobuf.protos.FollowUserResp;
 import com.protobuf.protos.GreetingResp;
 import com.protobuf.protos.LeaveChannelResponse;
 import com.protobuf.protos.LoginResp;
+import com.protobuf.protos.RequestSuperChannelSearch;
+import com.protobuf.protos.ResponseSuperChannelSearch;
 import com.yiyou.ga.net.protocol.PByteArray;
 import com.yiyou.ga.net.protocol.YProtocol;
 
@@ -132,7 +134,8 @@ public class TTSocketChannel {
                     byte[] arr_b = new byte[this.bodylen];
                     System.arraycopy(this.tempBuffer.array(), this.limitation, arr_b, 0, this.bodylen);
                     ByteBuffer byteBuffer0 = ByteBuffer.wrap(arr_b);
-                    System.out.println("cmd:" + this.msghead.cmd + ", bodylen:" + this.bodylen);
+                    Log.d(TAG, "cmd:" + this.msghead.cmd + ", bodylen:" + this.bodylen);
+
                     switch (this.msghead.cmd){
                         case Commands.cmd_auto_login:{//Auto Login Response
                             MessageBody messageBody = new MessageBody(byteBuffer0);
@@ -151,7 +154,7 @@ public class TTSocketChannel {
                                 YProtocol.setUid(uid);
                                 YProtocol.native_setSessionKey(sessionKey);
                                 YProtocol.initAuthToken(uid, timestamp, authToken);
-                                System.out.println(s);
+                                //System.out.println(s);
 
 
                                 //Sync the keys and tokens, even though I still have no idea
@@ -166,6 +169,21 @@ public class TTSocketChannel {
                             }
 
 
+                            break;
+                        }
+                        case Commands.cmd_super_channel_search:{
+                            MessageBody messageBody = new MessageBody(byteBuffer0);
+                            MessageContent messageContent = messageBody.unpack_body();
+
+                            ResponseSuperChannelSearch responseSuperChannelSearch = ResponseSuperChannelSearch.parseFrom(messageContent.getBytes());
+                            String s = ByteHexStr.bytetoHexString_(messageContent.getBytes());
+                            if (responseSuperChannelSearch.getBaseResp().getErrCode() == 0) {
+                                ResponseSuperChannelSearch.SearchResp.ChannelInfo channelInfo = responseSuperChannelSearch.getSearchResp().getChannelInfo();
+                                MainActivity.channelIds.put(channelInfo.getDisplayId(), channelInfo.getChannelId());
+                                Log.d(TAG, "ResponseSuperChannelSearch successfully! ");
+                            }else{
+                                Log.d(TAG, "ResponseSuperChannelSearch failed! errCode:" + responseSuperChannelSearch.getBaseResp().getErrCode() + ", errMsg:" + responseSuperChannelSearch.getBaseResp().getErrMsg().toStringUtf8());
+                            }
                             break;
                         }
                         case Commands.cmd_enter_channel:{//OnEnterChannel

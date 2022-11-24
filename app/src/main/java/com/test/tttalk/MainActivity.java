@@ -10,7 +10,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.protobuf.ByteString;
 import com.protobuf.protos.AutoLogin;
@@ -21,6 +23,7 @@ import com.protobuf.protos.EnterChannelRequest;
 import com.protobuf.protos.FollowUser;
 import com.protobuf.protos.Greeting;
 import com.protobuf.protos.LeaveChannelRequest;
+import com.protobuf.protos.RequestSuperChannelSearch;
 import com.test.tttalk.databinding.ActivityMainBinding;
 import com.yiyou.ga.net.protocol.PByteArray;
 import com.yiyou.ga.net.protocol.YProtocol;
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     public TTSocketChannel ttSocketChannel = new TTSocketChannel();
 
     public String DeviceId = "";
+    public static HashMap<Long, Long> channelIds = new HashMap();
 
     //store in shared_prefs/pref_outside_share_info.xml
     public String key_web_ua = "Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt";
@@ -267,7 +271,32 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        Button btnSearchChannel = (Button) findViewById(R.id.btnSearchChannel);
+        btnSearchChannel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
 
+                        TTSocketChannel.seq++;
+                        String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                        RequestSuperChannelSearch searchRequest = RequestSuperChannelSearch.newBuilder()
+                                .setUnkobj1(RequestSuperChannelSearch.UnknownObj1.newBuilder().build())
+                                .setKeyWord(ByteString.copyFrom(channelStr.getBytes(StandardCharsets.UTF_8)))
+                                .setUnknown3(1)
+                                .setUnknown5(100).build();
+                        String t = ByteHexStr.bytetoHexString_(searchRequest.toByteArray());
+                        PByteArray outByteArray = new PByteArray();
+                        boolean ret = YProtocol.pack(Commands.cmd_super_channel_search, searchRequest.toByteArray(), outByteArray, false, 0);
+                        byte[] pack_header_bytes = MainActivity.pack_header(Commands.cmd_super_channel_search, TTSocketChannel.seq, (short) 0, outByteArray.value);
+                        ByteBuffer byteBuffer = ByteBuffer.wrap(pack_header_bytes);
+                        ttSocketChannel.write(byteBuffer);
+                    }
+                }).start();
+
+            }
+        });
 
         Button btnEnterChannel = (Button) findViewById(R.id.btnEnterChannel);
         btnEnterChannel.setOnClickListener(new View.OnClickListener() {
@@ -284,10 +313,18 @@ public class MainActivity extends AppCompatActivity {
 //                                .setUnknown4(100).build();
 
                         TTSocketChannel.seq++;
+                        String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+
+                        if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
+                            Toast.makeText(getApplication(), "ChannelId doesn't exist in the channelIds!" + channelStr, Toast.LENGTH_LONG);
+                        }
+                        Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
+
+
                         EnterChannelRequest enterChannelRequest = EnterChannelRequest.newBuilder().setUb1(EnterChannelRequest.unknown_obj1.newBuilder())
-                                .setRoomId(164351337)
+                                .setRoomId(realChannelId)
                                 .setUb3(EnterChannelRequest.unknown_obj3.newBuilder().setUnknownInt1(3))
-                                .setDisplayRoomId(158887230)
+                                .setDisplayRoomId(Long.valueOf(channelStr))
                                 .setUnknownInt7(12)
                                 .build();
                         String t = ByteHexStr.bytetoHexString_(enterChannelRequest.toByteArray());
@@ -310,9 +347,17 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         TTSocketChannel.seq++;
+
+                        String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+
+                        if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
+                            Toast.makeText(getApplication(), "ChannelId doesn't exist in the channelIds!" + channelStr, Toast.LENGTH_LONG);
+                        }
+                        Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
+
                         LeaveChannelRequest.Builder leaveBuilder = LeaveChannelRequest.newBuilder()
                                 .setUb1(LeaveChannelRequest.unknown_obj1.newBuilder().build())
-                                .setChannelId(164351337);
+                                .setChannelId(realChannelId);
 
                         LeaveChannelRequest leaveChannelRequest = leaveBuilder.build();
                         String t = ByteHexStr.bytetoHexString_(leaveChannelRequest.toByteArray());
