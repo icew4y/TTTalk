@@ -1,4 +1,5 @@
 package com.test.tttalk;
+import android.os.Message;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
@@ -150,6 +151,10 @@ public class TTSocketChannel {
                                 long timestamp = authInfo.getTimestamp();
                                 String authToken = authInfo.getAuthToken().toStringUtf8();
                                 MainActivity.loginKey = authInfo.getLoginkey().toStringUtf8();
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "Login successfully! uid:" + uid + ", sessionKey:" + sessionKey + ", timestamp:" + timestamp + ", authToken:" + authToken;
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "Login successfully! uid:" + uid + ", sessionKey:" + sessionKey + ", timestamp:" + timestamp + ", authToken:" + authToken);
                                 YProtocol.setUid(uid);
                                 YProtocol.native_setSessionKey(sessionKey);
@@ -165,6 +170,10 @@ public class TTSocketChannel {
 //                                this.test_cmd3580();
 //                                this.test_cmd401();
                             }else{
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "Login failed! errCode:" + loginResp.getBaseResp().getErrCode() + ", errMsg:" + loginResp.getBaseResp().getErrMsg().toStringUtf8();
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "Login failed! errCode:" + loginResp.getBaseResp().getErrCode() + ", errMsg:" + loginResp.getBaseResp().getErrMsg().toStringUtf8());
                             }
 
@@ -180,8 +189,16 @@ public class TTSocketChannel {
                             if (responseSuperChannelSearch.getBaseResp().getErrCode() == 0) {
                                 ResponseSuperChannelSearch.SearchResp.ChannelInfo channelInfo = responseSuperChannelSearch.getSearchResp().getChannelInfo();
                                 MainActivity.channelIds.put(channelInfo.getDisplayId(), channelInfo.getChannelId());
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "ResponseSuperChannelSearch successfully!:";
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "ResponseSuperChannelSearch successfully! ");
                             }else{
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "ResponseSuperChannelSearch failed! errCode:" + responseSuperChannelSearch.getBaseResp().getErrCode() + ", errMsg:" + responseSuperChannelSearch.getBaseResp().getErrMsg().toStringUtf8();
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "ResponseSuperChannelSearch failed! errCode:" + responseSuperChannelSearch.getBaseResp().getErrCode() + ", errMsg:" + responseSuperChannelSearch.getBaseResp().getErrMsg().toStringUtf8());
                             }
                             break;
@@ -193,8 +210,16 @@ public class TTSocketChannel {
                             EnterChannelResponse enterChannelResponse = EnterChannelResponse.parseFrom(messageContent.getBytes());
 
                             if (enterChannelResponse.getBaseResp().getErrCode() == 0) {
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "enterChannel successfully!";
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "enterChannel successfully! ");
                             }else{
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "enterChannel failed! errCode:" + enterChannelResponse.getBaseResp().getErrCode() + ", errMsg:" + enterChannelResponse.getBaseResp().getErrMsg().toStringUtf8();
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "enterChannel failed! errCode:" + enterChannelResponse.getBaseResp().getErrCode() + ", errMsg:" + enterChannelResponse.getBaseResp().getErrMsg().toStringUtf8());
                             }
                             break;
@@ -214,8 +239,16 @@ public class TTSocketChannel {
                             byte[] messageContent = messageBody.unpack_body().getBytes();
                             ChatMessageResp chatMessageResp = ChatMessageResp.parseFrom(messageContent);
                             if (chatMessageResp.getBaseResp().getErrCode() == 0) {
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "ChatMessage message sent successfully! ";
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "ChatMessage message sent successfully! ");
                             }else{
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "ChatMessage message sent failed! errCode:" + chatMessageResp.getBaseResp().getErrCode() + ", errMsg:" + chatMessageResp.getBaseResp().getErrMsg().toStringUtf8();
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "ChatMessage message sent failed! errCode:" + chatMessageResp.getBaseResp().getErrCode() + ", errMsg:" + chatMessageResp.getBaseResp().getErrMsg().toStringUtf8());
                             }
                             break;
@@ -225,8 +258,16 @@ public class TTSocketChannel {
                             MessageContent messageContent = messageBody.unpack_body();
                             LeaveChannelResponse leaveChannelResponse = LeaveChannelResponse.parseFrom(messageContent.getBytes());
                             if (leaveChannelResponse.getBaseResp().getErrCode() == 0) {
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "leaveChannelResponse successfully! ";
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "leaveChannelResponse successfully!");
                             }else{
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "leaveChannelResponse failed! errCode:" + leaveChannelResponse.getBaseResp().getErrCode() + ", errMsg:" + leaveChannelResponse.getBaseResp().getErrMsg().toStringUtf8();
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "leaveChannelResponse failed! errCode:" + leaveChannelResponse.getBaseResp().getErrCode() + ", errMsg:" + leaveChannelResponse.getBaseResp().getErrMsg().toStringUtf8());
                             }
                             break;
@@ -236,8 +277,16 @@ public class TTSocketChannel {
                             MessageContent messageContent = messageBody.unpack_body();
                             FollowUserResp followUserResp = FollowUserResp.parseFrom(messageContent.getBytes());
                             if (followUserResp.getBaseResp().getErrCode() == 0) {
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "follow User successfully! followed User Id:" + followUserResp.getFollowedUserId();
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "follow User successfully! followed User Id:" + followUserResp.getFollowedUserId());
                             }else{
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "followUser failed! errCode:" + followUserResp.getBaseResp().getErrCode() + ", errMsg:" + followUserResp.getBaseResp().getErrMsg().toStringUtf8();
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "followUser failed! errCode:" + followUserResp.getBaseResp().getErrCode() + ", errMsg:" + followUserResp.getBaseResp().getErrMsg().toStringUtf8());
                             }
 //
@@ -248,8 +297,16 @@ public class TTSocketChannel {
                             byte[] messageContent = messageBody.unpack_body().getBytes();
                             GreetingResp greetingResp = GreetingResp.parseFrom(messageContent);
                             if (greetingResp.getBaseResp().getErrCode() == 0) {
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "Greetings message sent successfully! ";
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "Greetings message sent successfully! ");
                             }else{
+                                Message msg = new Message();
+                                msg.what = 1;
+                                msg.obj = "Greetings message sent failed! errCode:" + greetingResp.getBaseResp().getErrCode() + ", errMsg:" + greetingResp.getBaseResp().getErrMsg().toStringUtf8();
+                                MainActivity.getMainInstance().sendMsg(msg);
                                 Log.d(TAG, "Greetings message sent failed! errCode:" + greetingResp.getBaseResp().getErrCode() + ", errMsg:" + greetingResp.getBaseResp().getErrMsg().toStringUtf8());
                             }
                             break;

@@ -1,5 +1,6 @@
 package com.test.tttalk;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,6 +8,9 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -52,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public TTSocketChannel ttSocketChannel = new TTSocketChannel();
+    private static MainActivity mainInstance = null;
 
     public String DeviceId = "";
     public static HashMap<Long, Long> channelIds = new HashMap();
@@ -64,6 +69,28 @@ public class MainActivity extends AppCompatActivity {
     public String androidid = "fbddc0a64a19b097";
 
     public static String loginKey = "";
+
+    private Handler messageHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            switch (msg.what){
+                case 1:{
+                    Toast.makeText(getApplication(), (String)msg.obj, Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                default:break;
+            }
+            return false;
+        }
+    });
+
+    public static MainActivity getMainInstance() {
+        return mainInstance;
+    }
+
+    public void sendMsg(Message msg) {
+        this.messageHandler.sendMessage(msg);
+    }
 
 
     public static byte[] pack_header(int cmd, int seq, short unknown, byte[] byteArray) {
@@ -154,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         YProtocol.sContextHolder = getApplication();
-
+        mainInstance = this;
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -316,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
                         String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
 
                         if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
-                            Toast.makeText(getApplication(), "ChannelId doesn't exist in the channelIds!" + channelStr, Toast.LENGTH_LONG);
+                            Toast.makeText(getApplication(), "ChannelId doesn't exist in the channelIds!" + channelStr, Toast.LENGTH_LONG).show();
                         }
                         Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
 
