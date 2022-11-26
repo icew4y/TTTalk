@@ -203,25 +203,25 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        AtomicBoolean isDone = new AtomicBoolean();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                MainActivity.this.DeviceId = MainActivity.this.getDeviceId();
-                isDone.set(true);
-            }
-        }).start();
-
-        while (!isDone.get()) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+//        AtomicBoolean isDone = new AtomicBoolean();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                MainActivity.this.DeviceId = MainActivity.this.getDeviceId();
+//                isDone.set(true);
+//            }
+//        }).start();
+//
+//        while (!isDone.get()) {
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         this.ttProtocol = new TTProtocol("13580590620", "296475024", "1",
-                "555f6144739d62894deff36b0d0b62ec", MainActivity.this.DeviceId,
+                "555f6144739d62894deff36b0d0b62ec", "BW82Bo7zrUTj2zq4puKdTJMjOmOV+SqsEhkiHJlgX7MeFlSa3Ex8p+kZiabXs32rc0qkPuXHnTSD9kWlbDpFR6Q==",
                 "17b6d6731ed4f34acc0d0d8cdc202b88", "fbddc0a64a19b097",
                 "Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt",
                 "Google Pixel3 XL");
@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
                         ttSocketChannel.write(ByteBuffer.wrap(
-                                ttProtocol.channel_chat_text(realChannelId, "Howdy")
+                                ttProtocol.channel_chat_text(realChannelId, "Howdy, y'all!")
                         ));
                     }
                 }).start();

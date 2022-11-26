@@ -115,6 +115,14 @@ public class TTProtocol {
         return MainActivity.pack_header(cmd, TTSocketChannel.seq, (short) 0, outByteArray.value);
     }
 
+    private byte[] pack_body2(int cmd, byte[] data) {
+        seq ++;
+        String t = ByteHexStr.bytetoHexString_(data);
+        PByteArray outByteArray = new PByteArray();
+        YProtocol.pack(cmd, data, outByteArray, false, 0);
+        return MainActivity.pack_header(cmd, TTSocketChannel.seq, (short) 0, outByteArray.value);
+    }
+
     public byte[] auto_login() {
         //byte[] data = ByteHexStr.hexToByteArray("0a091a002a038201003200120b31333538303539303632301a203535356636313434373339643632383934646566663336623064306236326563200328015a0231306207416e64726f69646a12414f5350206f6e2063726f737368617463689a01086f6666696369616caa01086f6666696369616cb201e1010a0012006ada0122c5014d6f7a696c6c612f352e3020284c696e75783b20416e64726f69642031303b20414f5350206f6e2063726f73736861746368204275696c642f515031412e3139303731312e3032303b20777629204170706c655765624b69742f3533372e333620284b48544d4c2c206c696b65204765636b6f292056657273696f6e2f342e30204368726f6d652f37342e302e333732392e313836204d6f62696c65205361666172692f3533372e333620545456657273696f6e2f362e31302e3120545446726f6d2f7474321066626464633061363461313962303937");
         AutoLogin.Builder autoLoginBuilder = AutoLogin.newBuilder();
@@ -157,7 +165,7 @@ public class TTProtocol {
                 .setKeyWord(ByteString.copyFrom(keyword.getBytes(StandardCharsets.UTF_8)))
                 .setUnknown3(1)
                 .setSearchType(100).build();
-        return pack_body(Commands.cmd_super_channel_search, searchRequest.toByteArray());
+        return pack_body2(Commands.cmd_super_channel_search, searchRequest.toByteArray());
     }
 
     public byte[] enter_channel(long channelId, long displayId){
@@ -168,7 +176,7 @@ public class TTProtocol {
                 .setDisplayRoomId(displayId)
                 .setUnknownInt7(12)
                 .build();
-        return pack_body(Commands.cmd_enter_channel, enterChannelRequest.toByteArray());
+        return pack_body2(Commands.cmd_enter_channel, enterChannelRequest.toByteArray());
     }
 
     public byte[] leave_channel(long channelId) {
@@ -177,7 +185,7 @@ public class TTProtocol {
                 .setChannelId(channelId);
 
         LeaveChannelRequest leaveChannelRequest = leaveBuilder.build();
-        return pack_body(Commands.cmd_leave_channel, leaveChannelRequest.toByteArray());
+        return pack_body2(Commands.cmd_leave_channel, leaveChannelRequest.toByteArray());
     }
 
     public byte[] follow_user(String followUserAccount, long channelId, long displayID, String tagName) {
@@ -212,7 +220,7 @@ public class TTProtocol {
                     .setChannelId(channelId)
                     .setChannelType(channelType);
             FollowUser followUser = followUserBuilder.build();
-            return pack_body(Commands.cmd_follow_user, followUser.toByteArray());
+            return pack_body2(Commands.cmd_follow_user, followUser.toByteArray());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -235,7 +243,7 @@ public class TTProtocol {
                 .setUnknown4(1)
                 .setUnknown5(1);
         ChatMessage chatMessage = chatMessageBuilder.build();
-        return pack_body(Commands.cmd_public_chat, chatMessage.toByteArray());
+        return pack_body2(Commands.cmd_public_chat, chatMessage.toByteArray());
     }
 
     public byte[] greet(String toAccount, String content) {
@@ -258,6 +266,6 @@ public class TTProtocol {
                 .setUnknown10(1)
                 .setUnkonwn12(8);
         Greeting greeting = greetingBuilder.build();
-        return pack_body(Commands.cmd_greetings, greeting.toByteArray());
+        return pack_body2(Commands.cmd_greetings, greeting.toByteArray());
     }
 }
