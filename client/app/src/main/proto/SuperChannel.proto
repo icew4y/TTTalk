@@ -18,7 +18,7 @@ option objc_class_prefix = "GPB";
 
 //pack:{
 //  "1": {},
-//  "2": "158887230",
+//  "2": bytearray("158887230"),
 //  "3": "1",
 //  "5": "100"
 //}
@@ -27,7 +27,7 @@ message RequestSuperChannelSearch{
   optional UnknownObj1 unkobj1 = 1;
   optional bytes keyWord = 2;
   optional int32 unknown3 = 3;
-  optional int32 unknown5 = 5;
+  optional int32 searchType = 5;//100 = Channel, 10 = Guild
   message UnknownObj1{
 
   }

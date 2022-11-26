@@ -29,7 +29,7 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 
 public class TTSocketChannel {
-    private static String TAG = "TTSocketChannel";
+    private static String TAG = "TTTalk";
 
 
     public static int seq = 4;
@@ -219,6 +219,7 @@ public class TTSocketChannel {
                             break;
                         }
                         case Commands.cmd_public_chat:{
+                            String s = ByteHexStr.bytetoHexString_(byteBuffer0.array());
                             MessageBody messageBody = new MessageBody(byteBuffer0);
                             byte[] messageContent = messageBody.unpack_body().getBytes();
                             ChatMessageResp chatMessageResp = ChatMessageResp.parseFrom(messageContent);
