@@ -76,4 +76,20 @@
         android:text="158887230"
         app:layout_constraintStart_toEndOf="@+id/btnSearchChannel"
         tools:layout_editor_absoluteY="48dp" />
+
+    <Button
+        android:id="@+id/btnReqChannelList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="获取房间列表"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnGreets" />
+
+    <Button
+        android:id="@+id/btnReqMicMember"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="获取房间成员"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnReqChannelList" />
 </androidx.constraintlayout.widget.ConstraintLayout>

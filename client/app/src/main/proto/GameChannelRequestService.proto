@@ -1,0 +1,71 @@
+syntax = "proto2";
+
+package com.protobuf.protos;
+option java_package = "com.protobuf.protos";
+option java_multiple_files = true;
+option objc_class_prefix = "GPB";
+
+
+// applog:GameChannelRequestService,
+// reqNewGameChannelList: count 20, blockOption [Lr.b.s5h;@8c34959, tabId 83, sex 0, getMode 2, channelPackageId official, noBrowseList null, categoryIds [I@f55891e,
+// pack(alternative decoder:https://protogen.marcgravell.com/decode):{
+//  "1": {},
+//  "2": "20",
+//  "4": "83",
+//  "6": "2",
+//  "7": "bytearray(b'official')"
+//}
+
+// 00000080bd60000100000020000000000000000000000000000000000000000000000000000000000000000000000012060a000100000c0811abd99017b6d6731ed4f34acc0d0d8cdc202b
+// 88000003e9000200050000000000000011000000000000000066deff246a3c6603a4100b169eb692df26f6f08840d727af73b15ec023b1e8a1
+message ReqNewGameChannelList{
+  optional BaseReq baseReq = 1;
+  optional int32 count = 2;
+  optional int32 tabId = 4;
+  optional int32 getMode = 6;
+  optional bytes channelPackageId = 7;
+  message BaseReq{
+
+  }
+}
+
+message RespNewGameChannelList{
+  optional BaseResp baseResp = 1;
+  repeated ChannelList channelList = 2;
+  message BaseResp{
+    optional int32 errCode = 1;
+    optional bytes errMsg = 2;
+  }
+  message ChannelList{
+    optional int64 channelId = 1;
+    optional bytes channelName = 2;
+    optional int64 ownerUid = 3;
+    optional bytes channelOwnerUserName = 4;
+    optional int32 channelOwnerSex = 5;
+    optional int64 memberCount = 6;
+    optional ChannelView channelView = 7;
+    optional int32 rcmdLabelType = 8;
+    optional bytes geoInfo = 9;
+    optional int32 levelId = 10;
+    optional TraceInfo traceInfo = 11;
+    optional int32 tabId = 12;
+    optional bytes tabName = 13;
+    message ChannelView{
+      optional ViewMoba view_moba = 2;
+      message ViewMoba{
+        repeated Items items = 1;
+        optional bytes levelDesc = 2;
+        optional bytes tabName = 3;
+        optional bytes loadImage = 4;
+        optional bytes colorCode = 5;
+        message Items{
+          optional bytes desc = 1;
+          optional bool bgColor = 2;
+        }
+      }
+    }
+    message TraceInfo{
+      optional int32 recallFlag = 1;//traceInfo, 10
+    }
+  }
+}

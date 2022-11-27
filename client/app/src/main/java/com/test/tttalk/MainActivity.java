@@ -5,7 +5,6 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,38 +14,25 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.protobuf.ByteString;
-import com.protobuf.protos.AutoLogin;
-import com.protobuf.protos.ChatMessage;
-import com.protobuf.protos.ChatMessageOrBuilder;
-import com.protobuf.protos.DeviceInfo;
-import com.protobuf.protos.EnterChannelRequest;
-import com.protobuf.protos.FollowUser;
-import com.protobuf.protos.Greeting;
-import com.protobuf.protos.LeaveChannelRequest;
-import com.protobuf.protos.RequestSuperChannelSearch;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.protobuf.protos.ReqNewGameChannelList;
+import com.protobuf.protos.RespNewGameChannelList;
 import com.test.tttalk.databinding.ActivityMainBinding;
 import com.test.tttalk.protocol.TTProtocol;
-import com.yiyou.ga.net.protocol.PByteArray;
 import com.yiyou.ga.net.protocol.YProtocol;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import okhttp3.Response;
-
+import com.protobuf.protos.GameChannelRequestService;
 public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'tttalk' library on application startup.
@@ -55,13 +41,7 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("marsxlog");
         System.loadLibrary("tttalk");
     }
-
-    public TTSocketChannel ttSocketChannel = new TTSocketChannel();
     private static MainActivity mainInstance = null;
-    public TTProtocol ttProtocol = null;
-
-    public String DeviceId = "";
-    public static HashMap<Long, Long> channelIds = new HashMap();
 
     //store in shared_prefs/pref_outside_share_info.xml
     public String key_web_ua = "Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt";
@@ -69,17 +49,15 @@ public class MainActivity extends AppCompatActivity {
     //android have no effect to login action, no matter what it's given
     //even by a random string, Auto login still works
     public String androidid = "fbddc0a64a19b097";
-
-    public static String loginKey = "";
-
     private static String TAG = "TTTalk";
+    private TTThread ttThread;
 
     private Handler messageHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             switch (msg.what){
                 case 1:{
-                    Toast.makeText(getApplication(), (String)msg.obj, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplication(), (String)msg.obj, Toast.LENGTH_SHORT).show();
                     break;
                 }
                 default:break;
@@ -91,52 +69,10 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity getMainInstance() {
         return mainInstance;
     }
-
     public void sendMsg(Message msg) {
         this.messageHandler.sendMessage(msg);
     }
-
-    private void LogInfo(String info) {
-        Message msg = new Message();
-        msg.what = 1;
-        msg.obj = info;
-        MainActivity.getMainInstance().sendMsg(msg);
-        Log.d(TAG, info);
-    }
-    public static byte[] pack_header(int cmd, int seq, short unknown, byte[] byteArray) {
-        int msglen = byteArray.length;
-        ByteArrayOutputStream byteArrayOutputStream0 = new ByteArrayOutputStream();
-        DataOutputStream dataOutputStream0 = new DataOutputStream(byteArrayOutputStream0);
-        try {
-            dataOutputStream0.writeInt(msglen + 20);
-            dataOutputStream0.writeShort(20);
-            dataOutputStream0.writeShort(2);
-            dataOutputStream0.writeInt(cmd);
-            dataOutputStream0.writeInt(seq);
-            dataOutputStream0.writeShort(unknown);
-            dataOutputStream0.writeShort(0);
-            if (byteArray != null) {
-                dataOutputStream0.write(byteArray);
-            }
-
-            dataOutputStream0.close();
-            Log.d("Packer", "bodyLen = ".concat(String.valueOf(msglen)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        byte[] arr_b = byteArrayOutputStream0.toByteArray();
-        try {
-            byteArrayOutputStream0.close();
-            return arr_b;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     private ActivityMainBinding binding;
-
     private static final String[] permissions = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -202,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
 //        AtomicBoolean isDone = new AtomicBoolean();
 //        new Thread(new Runnable() {
 //            @Override
@@ -220,57 +155,29 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        }
 
-        this.ttProtocol = new TTProtocol("13580590620", "296475024", "1",
-                "555f6144739d62894deff36b0d0b62ec", "BW82Bo7zrUTj2zq4puKdTJMjOmOV+SqsEhkiHJlgX7MeFlSa3Ex8p+kZiabXs32rc0qkPuXHnTSD9kWlbDpFR6Q==",
-                "17b6d6731ed4f34acc0d0d8cdc202b88", "fbddc0a64a19b097",
-                "Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt",
-                "Google Pixel3 XL");
-        this.ttProtocol.init(getApplication());
-
-
 
         //----ishumei return:{"code":1100,"detail":{"deviceId":"B6nWouzehOiCoX9epMn5W0ovRA3W7PcYE\/aOcs0R9ggf9COWLNa7+t8tQL4do5gJzI3U0\/94bJjd9w1Ynlii8w=="},"requestId":"06b184412d1545fe5e713a64afc2b693"}
         //----before getPreSharedXML:73c8e35220bc684412f1bd86b04785ca.xml
         //MainActivity.this.DeviceId = "F0QbUvikXMCkKayVrQ3DtAgxB8pnIrY7/NrKaUXvw+7RH54uBLofmz0/Ft5wz35O7zctESDu15aXoRvKPFx5CQ==";
+        this.ttThread = new TTThread("TTThread");
+        this.ttThread.setApplication(getApplication());
+        this.ttThread.start();
 
-        // Network operations must not be running in the main thread.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ttSocketChannel.main();
-            }
-        }).start();
 
         Button btnLogin = (Button) findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Auto login package
-                        ttSocketChannel.write(
-                                ByteBuffer.wrap(ttProtocol.auto_login())
-                        );
-                    }
-                }).start();
-
+                // Auto login package
+                ttThread.auto_login();
             }
         });
         Button btnSearchChannel = (Button) findViewById(R.id.btnSearchChannel);
         btnSearchChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                        ttSocketChannel.write(ByteBuffer.wrap(
-                                ttProtocol.search_channel(channelStr)
-                        ));
-                    }
-                }).start();
-
+                String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                ttThread.search_channel(channelStr);
             }
         });
 
@@ -278,21 +185,8 @@ public class MainActivity extends AppCompatActivity {
         btnEnterChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                        if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
-                            LogInfo("ChannelId doesn't exist in the channelIds!" + channelStr);
-                            return;
-                        }
-                        Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
-                        ttSocketChannel.write(ByteBuffer.wrap(
-                                ttProtocol.enter_channel(realChannelId, Long.valueOf(channelStr))
-                        ));
-                    }
-                }).start();
-
+                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                ttThread.enter_channel(Long.valueOf(dislayId));
             }
         });
 
@@ -300,21 +194,8 @@ public class MainActivity extends AppCompatActivity {
         btnLeaveChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                        if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
-                            LogInfo("ChannelId doesn't exist in the channelIds!" + channelStr);
-                            return;
-                        }
-                        Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
-                        ttSocketChannel.write(ByteBuffer.wrap(
-                                ttProtocol.leave_channel(realChannelId)
-                        ));
-                    }
-                }).start();
-
+                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                ttThread.leave_channel(Long.valueOf(dislayId));
             }
         });
 
@@ -322,23 +203,10 @@ public class MainActivity extends AppCompatActivity {
         btnFollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //String displayID = "158887230";
-                        //String channelID = "164351337";
-                        String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                        if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
-                            LogInfo("ChannelId doesn't exist in the channelIds!" + channelStr);
-                            return;
-                        }
-                        Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
-                        ttSocketChannel.write(ByteBuffer.wrap(
-                                ttProtocol.follow_user("tt317892845", realChannelId, Long.valueOf(channelStr), "王者荣耀")
-                        ));
-                    }
-                }).start();
-
+                //String displayID = "158887230";
+                //String channelID = "164351337";
+                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                ttThread.follow_user("tt317892845", Long.valueOf(dislayId), "王者荣耀");
             }
         });
 
@@ -347,22 +215,8 @@ public class MainActivity extends AppCompatActivity {
         btnChatText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                        if (!MainActivity.channelIds.containsKey(Long.valueOf(channelStr))){
-                            LogInfo("ChannelId doesn't exist in the channelIds!" + channelStr);
-                            return;
-                        }
-                        Long realChannelId = MainActivity.channelIds.get(Long.valueOf(channelStr));
-                        ttSocketChannel.write(ByteBuffer.wrap(
-                                ttProtocol.channel_chat_text(realChannelId, "Howdy, y'all!")
-                        ));
-                    }
-                }).start();
-
+                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                ttThread.channel_chat_text(Long.valueOf(dislayId), "Howdy, y'all!");
             }
         });
 
@@ -371,15 +225,23 @@ public class MainActivity extends AppCompatActivity {
         btnGreets.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ttSocketChannel.write(
-                                ByteBuffer.wrap(ttProtocol.greet("tt317892845", "Hi! Nice to meet you! How are you doing?"))
-                        );
-                    }
-                }).start();
+                ttThread.greet("tt317892845", "Hi! Nice to meet you! How are you doing?");
+            }
+        });
 
+        Button btnReqChannelList = (Button) findViewById(R.id.btnReqChannelList);
+        btnReqChannelList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ttThread.req_new_game_channel_list(TagIds.getId("王者荣耀"), 2, 20);
+            }
+        });
+        Button btnReqMicMember = (Button) findViewById(R.id.btnReqMicMember);
+        btnReqMicMember.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                ttThread.req_channel_under_mic_member_list(Long.valueOf(dislayId));
             }
         });
 

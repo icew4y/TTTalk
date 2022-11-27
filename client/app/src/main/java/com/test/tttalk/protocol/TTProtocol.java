@@ -2,22 +2,22 @@ package com.test.tttalk.protocol;
 
 import android.app.Application;
 import android.util.Log;
-import android.widget.EditText;
 
 import com.google.protobuf.ByteString;
 import com.protobuf.protos.AutoLogin;
 import com.protobuf.protos.ChatMessage;
+import com.protobuf.protos.CheckSyncKey;
 import com.protobuf.protos.DeviceInfo;
 import com.protobuf.protos.EnterChannelRequest;
 import com.protobuf.protos.FollowUser;
 import com.protobuf.protos.Greeting;
 import com.protobuf.protos.LeaveChannelRequest;
+import com.protobuf.protos.ReqNewGameChannelList;
+import com.protobuf.protos.RequestChannelUnderMicMemberList;
 import com.protobuf.protos.RequestSuperChannelSearch;
 import com.test.tttalk.ByteHexStr;
 import com.test.tttalk.Commands;
 import com.test.tttalk.MainActivity;
-import com.test.tttalk.R;
-import com.test.tttalk.TTSocketChannel;
 import com.yiyou.ga.net.protocol.PByteArray;
 import com.yiyou.ga.net.protocol.YProtocol;
 
@@ -27,13 +27,13 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class TTProtocol {
     private String acc, uid, acc_type, pwd, deviceID, deviceIDV2, androidid, key_web_ua;
     private int seq;
     private String deviceModel;
+
 
     public TTProtocol(String acc, String uid, String acc_type, String pwd, String deviceID, String deviceIDV2, String androidid, String key_web_ua, String deviceModel) {
         this.acc = acc;
@@ -112,7 +112,7 @@ public class TTProtocol {
         String t = ByteHexStr.bytetoHexString_(data);
         PByteArray outByteArray = new PByteArray();
         YProtocol.pack(cmd, data, outByteArray, true, 0);
-        return MainActivity.pack_header(cmd, TTSocketChannel.seq, (short) 0, outByteArray.value);
+        return pack_header(cmd, seq, (short) 0, outByteArray.value);
     }
 
     private byte[] pack_body2(int cmd, byte[] data) {
@@ -120,7 +120,7 @@ public class TTProtocol {
         String t = ByteHexStr.bytetoHexString_(data);
         PByteArray outByteArray = new PByteArray();
         YProtocol.pack(cmd, data, outByteArray, false, 0);
-        return MainActivity.pack_header(cmd, TTSocketChannel.seq, (short) 0, outByteArray.value);
+        return pack_header(cmd, seq, (short) 0, outByteArray.value);
     }
 
     public byte[] auto_login() {
@@ -246,7 +246,7 @@ public class TTProtocol {
         return pack_body2(Commands.cmd_public_chat, chatMessage.toByteArray());
     }
 
-    public byte[] greet(String toAccount, String content) {
+    public byte[] greet(String toAccount, String content, String loginKey) {
         DeviceInfo.Builder deviceBuilder = DeviceInfo.newBuilder().setDevicesm(
                 DeviceInfo.DeviceShumei.newBuilder().setDeviceId(
                         DeviceInfo.DeviceShumei.DeviceId.newBuilder().setDeviceIdStr(ByteString.copyFrom(
@@ -262,10 +262,42 @@ public class TTProtocol {
                 .setCi(3)
                 .setClientTime(System.currentTimeMillis() / 1000)
                 .setUnknown8(0)
-                .setLoginKey(ByteString.copyFromUtf8(MainActivity.loginKey))
+                .setLoginKey(ByteString.copyFromUtf8(loginKey))
                 .setUnknown10(1)
                 .setUnkonwn12(8);
         Greeting greeting = greetingBuilder.build();
         return pack_body2(Commands.cmd_greetings, greeting.toByteArray());
+    }
+
+    public byte[] check_sync_keys() {
+        CheckSyncKey.Builder syncKeyBuilder = CheckSyncKey.newBuilder()
+                .setUnkobj1(CheckSyncKey.Unknown1.newBuilder().build())
+                .setUnknown4(1)
+                .setVersion(ByteString.copyFromUtf8("6.10.1"))
+                .setVersionCode(16243)
+                .setOfficial(ByteString.copyFromUtf8("official"));
+
+        CheckSyncKey checkSyncKey = syncKeyBuilder.build();
+        return pack_body2(Commands.cmd_check_sync_key, checkSyncKey.toByteArray());
+    }
+
+    public byte[] req_new_game_channel_list(int tagId, int gameMode, int count){
+        ReqNewGameChannelList reqNewGameChannelList = ReqNewGameChannelList.newBuilder()
+                .setBaseReq(ReqNewGameChannelList.BaseReq.newBuilder())
+                .setCount(count)
+                .setTabId(tagId)
+                .setGetMode(gameMode)
+                .setChannelPackageId(ByteString.copyFromUtf8("official"))
+                .build();
+        return pack_body2(Commands.cmd_req_game_channel_list, reqNewGameChannelList.toByteArray());
+    }
+
+    public byte[] req_channel_under_mic_member_list(long channelId){
+        RequestChannelUnderMicMemberList requestChannelUnderMicMemberList = RequestChannelUnderMicMemberList.newBuilder()
+                .setBaseReq(RequestChannelUnderMicMemberList.BaseReq.newBuilder())
+                .setChannelId(channelId)
+                .build();
+
+        return pack_body2(Commands.cmd_req_under_mic_member_list, requestChannelUnderMicMemberList.toByteArray());
     }
 }

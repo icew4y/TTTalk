@@ -4,6 +4,9 @@ import xml.etree.ElementTree as ET
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     try:
+
+        # pull files from an Android device in which TT Talk is installed
+        # notice: TT Talk must be logged in that device
         os.system('adb shell su 0 "cp /data/data/com.yiyou.ga/shared_prefs/auth.xml /sdcard/auth.xml"')
         os.system('adb shell su 0 "cp /data/data/com.yiyou.ga/shared_prefs/pref_outside_share_info.xml /sdcard/pref_outside_share_info.xml"')
         os.system('adb shell su 0 "cp /data/data/com.yiyou.ga/shared_prefs/BUGLY_COMMON_VALUES.xml /sdcard/BUGLY_COMMON_VALUES.xml"')
@@ -17,6 +20,7 @@ if __name__ == '__main__':
         os.system('adb pull /sdcard/73c8e35220bc684412f1bd86b04785ca.xml .')
         os.system('adb pull /sdcard/preference_new_deivce_id.xml .')
 
+        # read the information that is used in 'client' project
         acc = None
         uid = None
         acc_type = None
@@ -72,6 +76,7 @@ if __name__ == '__main__':
             if 'preference_key_deivce_id_v2' == attr['name']:
                 deviceIdV2 = child.text
 
+        # writes everything into a json formatted file
         if acc is None or uid is None or acc_type is None or pwd is None or deviceID is None or androidid is None or key_web_ua is None:
             print(u'信息读取失败.')
         else:

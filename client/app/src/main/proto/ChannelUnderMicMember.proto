@@ -1,0 +1,91 @@
+syntax = "proto2";
+
+package com.protobuf.protos;
+option java_package = "com.protobuf.protos";
+option java_multiple_files = true;
+option objc_class_prefix = "GPB";
+
+
+
+
+//{
+//  "1": {},
+//  "2": 26712913
+//}
+message RequestChannelUnderMicMemberList{
+  optional BaseReq baseReq = 1;
+  optional int64 channelId = 2;
+  message BaseReq{
+
+  }
+}
+
+//0a26080012003a20373237343139363237656134386239353664643462386533313438373565623510d1b6de0c1a2f0a0974743932363535373410e8afb5191800220478e6b5b748018201127665722d32303232313130373137353934351a3c0a0b747432323538393938333810b1cec53d1800220fe9878ee58e9fe696b0e4b98be58aa948018201127665722d32303231303330353134343133301a3a0a0b7474333130343937323338108bb1c387011800220ce89d8ee5ad90e88eb1e88eb148018201127665722d32303232303730363033333734351a2f0a0a7474313838383339333610abfbaf2518002203e29ca848018201127665722d32303231303130373232353434371a1f0a0b74743331353633393835341090b3af8d011800220669636577617948002005
+//{
+//  "1": {
+//    "1": 0,
+//    "2": {},
+//    "7": "727419627ea48b956dd4b8e314875eb5"
+//  },
+//  "2": 26712913,
+//  "3": [
+//    {
+//      "1": "tt9265574",
+//      "2": 53303272,
+//      "3": 0,
+//      "4": "x海",
+//      "9": 1,
+//      "16": "ver-20221107175945"
+//    },
+//    {
+//      "1": "tt225899838",
+//      "2": 129066801,
+//      "3": 0,
+//      "4": "野原新之助",
+//      "9": 1,
+//      "16": "ver-20210305144130"
+//    },
+//    {
+//      "1": "tt310497238",
+//      "2": 284219531,
+//      "3": 0,
+//      "4": "蝎子莱莱",
+//      "9": 1,
+//      "16": "ver-20220706033745"
+//    },
+//    {
+//      "1": "tt18883936",
+//      "2": 78380459,
+//      "3": 0,
+//      "4": "✨",
+//      "9": 1,
+//      "16": "ver-20210107225447"
+//    },
+//    {
+//      "1": "tt315639854",
+//      "2": 296475024,
+//      "3": 0,
+//      "4": "iceway",
+//      "9": 0
+//    }
+//  ],
+//  "4": 5
+//}
+message ResponseChannelUnderMicMemberList{
+  optional BaseResp baseResp = 1;
+  optional int64 channelId = 2;
+  repeated ChannelMemberInfo channelMemberInfo = 3;
+  optional int32 currMemberTotal = 4;
+  message BaseResp{
+    optional int32 errCode = 1;
+    optional bytes errMsg = 2;
+  }
+  message ChannelMemberInfo{
+    optional bytes account = 1;
+    optional int64 uid = 2;
+    optional bool isMuted = 3;
+    optional bytes nickName = 4;
+    optional int32 sex = 9;
+    optional bytes faceMd5 = 16;
+  }
+}
