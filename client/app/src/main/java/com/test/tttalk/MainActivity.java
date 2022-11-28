@@ -10,34 +10,24 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.text.Editable;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.protobuf.protos.ReqNewGameChannelList;
-import com.protobuf.protos.RespNewGameChannelList;
 import com.test.tttalk.databinding.ActivityMainBinding;
-import com.test.tttalk.protocol.TTProtocol;
 import com.yiyou.ga.net.protocol.YProtocol;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import okhttp3.Response;
-import com.protobuf.protos.GameChannelRequestService;
+
 public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'tttalk' library on application startup.
@@ -55,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     //even by a random string, Auto login still works
     public String androidid = "fbddc0a64a19b097";
     private static String TAG = "TTTalk";
-    private TTThread ttThread;
+    private TTalk TTalk;
 
     private Handler messageHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
         @Override
@@ -175,9 +165,9 @@ public class MainActivity extends AppCompatActivity {
         //MainActivity.this.DeviceId = "F0QbUvikXMCkKayVrQ3DtAgxB8pnIrY7/NrKaUXvw+7RH54uBLofmz0/Ft5wz35O7zctESDu15aXoRvKPFx5CQ==";
 
         String ck = "{\"acc\": \"13580590620\", \"uid\": \"296475024\", \"acc_type\": \"1\", \"pwd\": \"555f6144739d62894deff36b0d0b62ec\", \"deviceID\": \"BDtLXJ5ss8Df97P7qM7JMD4NMyrc+fa4Fj3q/qeLa9GmfC8K6kfiOsybHgHvslhSkECpmWQ+aHTSj6zDbef9E9A==\", \"deviceIdV2\": \"17b6d6731ed4f34acc0d0d8cdc202b88\", \"androidid\": \"fbddc0a64a19b097\", \"key_web_ua\": \"Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt\"}";
-        this.ttThread = new TTThread();
-        this.ttThread.setAccountCookie(getApplication(), ck);
-        this.ttThread.start();
+        this.TTalk = new TTalk();
+        this.TTalk.setAccountCookie(getApplication(), ck);
+        this.TTalk.start();
 
 
         TextView logEdt = (TextView) findViewById(R.id.edtLog);
@@ -189,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Auto login package
-                ttThread.auto_login();
+                TTalk.auto_login();
             }
         });
         Button btnSearchChannel = (Button) findViewById(R.id.btnSearchChannel);
@@ -197,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String channelStr = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                ttThread.search_channel(channelStr);
+                TTalk.search_channel(channelStr);
             }
         });
 
@@ -206,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                ttThread.enter_channel(Long.valueOf(displayId));
+                TTalk.enter_channel(Long.valueOf(displayId));
             }
         });
 
@@ -215,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                ttThread.leave_channel(Long.valueOf(displayId));
+                TTalk.leave_channel(Long.valueOf(displayId));
             }
         });
 
@@ -226,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
                 //tt317892845
                 String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
                 String AccountId = ((EditText) findViewById(R.id.edtAccountId)).getText().toString();
-                ttThread.follow_user(AccountId, Long.valueOf(displayId), "王者荣耀");
+                TTalk.follow_user(AccountId, Long.valueOf(displayId), "王者荣耀");
             }
         });
 
@@ -237,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
                 String content = ((EditText) findViewById(R.id.edtPublichChatMessage)).getText().toString();
-                ttThread.channel_chat_text(Long.valueOf(displayId), content);
+                TTalk.channel_chat_text(Long.valueOf(displayId), content);
             }
         });
 
@@ -248,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String greetToAccountId = ((EditText) findViewById(R.id.edtGreetToAccountId)).getText().toString();
                 String greetMessage = ((EditText) findViewById(R.id.edtGreetMessage)).getText().toString();
-                ttThread.greet(greetToAccountId, greetMessage);
+                TTalk.greet(greetToAccountId, greetMessage);
             }
         });
 
@@ -257,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String edtTagId = ((EditText) findViewById(R.id.edtTagId)).getText().toString();
-                ttThread.req_new_game_channel_list(Integer.valueOf(edtTagId), 2, 20);
+                TTalk.req_new_game_channel_list(Integer.valueOf(edtTagId), 2, 20);
                 //ttThread.req_new_game_channel_list(TagIds.getId("全房间"), 2, 20);
             }
         });
@@ -266,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String channelId = ((EditText) findViewById(R.id.edtChannelId)).getText().toString();
-                ttThread.req_channel_under_mic_member_list(Long.valueOf(channelId));
+                TTalk.req_channel_under_mic_member_list(Long.valueOf(channelId));
 //                if (ttThread.getChannels().size() > 0) {
 //                    Iterator<Map.Entry<Long, RespNewGameChannelList.ChannelList>> iterator = ttThread.getChannels().entrySet().iterator();
 //                    while (iterator.hasNext()) {

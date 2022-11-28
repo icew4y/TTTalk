@@ -36,7 +36,7 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class TTThread extends HandlerThread {
+public class TTalk extends HandlerThread {
 
 
     private Application application;
@@ -83,7 +83,7 @@ public class TTThread extends HandlerThread {
         this.application = application;
     }
 
-    public TTThread() {
+    public TTalk() {
         super("TTThread");
     }
 
@@ -363,6 +363,10 @@ public class TTThread extends HandlerThread {
 
     private void onRespose(int cmd, ByteBuffer data) {
         try {
+            //cmd 6 should be notification
+            if (cmd == 6) {
+                return;
+            }
             byte[] bodyBytes = unpack(data);
             if (bodyBytes == null) {
                 LogInfo("unpack failed! cmd:" + cmd);
