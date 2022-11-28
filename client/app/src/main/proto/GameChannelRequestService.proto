@@ -51,6 +51,8 @@ message RespNewGameChannelList{
     optional int32 tabId = 12;
     optional bytes tabName = 13;
     message ChannelView{
+      // ViewMoba is just one of the Views that is defined in TT Talk
+      // there are many Views still not known yet.
       optional ViewMoba view_moba = 2;
       message ViewMoba{
         repeated Items items = 1;

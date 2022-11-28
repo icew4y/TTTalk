@@ -63,12 +63,18 @@ public class TTThread extends HandlerThread {
     private String TAG = "TTTalk";
     private int seq = 4;
     public TTProtocol ttProtocol;
-    private SocketChannel channel;
+    private SocketChannel socketChannel;
     private Selector selector;
     private boolean finishConnect = false;
     private String loginKey = "";
     private SendThread sendThread = new SendThread("SendThread");
-    private static HashMap<Long, Long> channelIds = new HashMap();
+    private HashMap<Long, Long> channelIds = new HashMap();
+
+    public HashMap<Long, RespNewGameChannelList.ChannelList> getChannels() {
+        return channels;
+    }
+
+    private HashMap<Long, RespNewGameChannelList.ChannelList> channels = new HashMap<>();
     private int totalRead = 0;
     private MessageHeader msghead;
 
@@ -104,7 +110,7 @@ public class TTThread extends HandlerThread {
 
     public void write(ByteBuffer buffer) {
         try {
-            this.channel.write(buffer);
+            this.socketChannel.write(buffer);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -353,7 +359,8 @@ public class TTThread extends HandlerThread {
     //                                this.test_cmd3580();
     //                                this.test_cmd401();
                     }else{
-                        LogInfo("Login failed! errCode:" + loginResp.getBaseResp().getErrCode() + ", errMsg:" + loginResp.getBaseResp().getErrMsg().toStringUtf8());
+                        LogInfo("Login failed! errCode:" + loginResp.getBaseResp().getErrCode() +
+                                ", errMsg:" + loginResp.getBaseResp().getErrMsg().toStringUtf8());
                     }
 
 
@@ -370,7 +377,8 @@ public class TTThread extends HandlerThread {
                         this.channelIds.put(channelInfo.getDisplayId(), channelInfo.getChannelId());
                         LogInfo("ResponseSuperChannelSearch successfully! ");
                     }else{
-                        LogInfo("ResponseSuperChannelSearch failed! errCode:" + responseSuperChannelSearch.getBaseResp().getErrCode() + ", errMsg:" + responseSuperChannelSearch.getBaseResp().getErrMsg().toStringUtf8());
+                        LogInfo("ResponseSuperChannelSearch failed! errCode:" + responseSuperChannelSearch.getBaseResp().getErrCode() +
+                                ", errMsg:" + responseSuperChannelSearch.getBaseResp().getErrMsg().toStringUtf8());
                     }
                     break;
                 }
@@ -383,7 +391,8 @@ public class TTThread extends HandlerThread {
                     if (enterChannelResponse.getBaseResp().getErrCode() == 0) {
                         LogInfo("enterChannel successfully! ");
                     }else{
-                        LogInfo("enterChannel failed! errCode:" + enterChannelResponse.getBaseResp().getErrCode() + ", errMsg:" + enterChannelResponse.getBaseResp().getErrMsg().toStringUtf8());
+                        LogInfo("enterChannel failed! errCode:" + enterChannelResponse.getBaseResp().getErrCode() +
+                                ", errMsg:" + enterChannelResponse.getBaseResp().getErrMsg().toStringUtf8());
                     }
                     break;
                 }case Commands.cmd_check_sync_key:{//unknown
@@ -393,7 +402,8 @@ public class TTThread extends HandlerThread {
                     if (checkSyncKeyResp.getBaseResp().getErrCode() == 0) {
                         LogInfo("CheckSyncKey successfully! ");
                     }else{
-                        LogInfo("CheckSyncKey failed! errCode:" + checkSyncKeyResp.getBaseResp().getErrCode() + ", errMsg:" + checkSyncKeyResp.getBaseResp().getErrMsg().toStringUtf8());
+                        LogInfo("CheckSyncKey failed! errCode:" + checkSyncKeyResp.getBaseResp().getErrCode() +
+                                ", errMsg:" + checkSyncKeyResp.getBaseResp().getErrMsg().toStringUtf8());
                     }
                     break;
                 }
@@ -405,7 +415,8 @@ public class TTThread extends HandlerThread {
                     if (chatMessageResp.getBaseResp().getErrCode() == 0) {
                         LogInfo("ChatMessage message sent successfully! ");
                     }else{
-                        LogInfo("ChatMessage message sent failed! errCode:" + chatMessageResp.getBaseResp().getErrCode() + ", errMsg:" + chatMessageResp.getBaseResp().getErrMsg().toStringUtf8());
+                        LogInfo("ChatMessage message sent failed! errCode:" + chatMessageResp.getBaseResp().getErrCode() +
+                                ", errMsg:" + chatMessageResp.getBaseResp().getErrMsg().toStringUtf8());
                     }
                     break;
                 }
@@ -416,7 +427,8 @@ public class TTThread extends HandlerThread {
                     if (leaveChannelResponse.getBaseResp().getErrCode() == 0) {
                         LogInfo("leaveChannelResponse successfully!");
                     }else{
-                        LogInfo("leaveChannelResponse failed! errCode:" + leaveChannelResponse.getBaseResp().getErrCode() + ", errMsg:" + leaveChannelResponse.getBaseResp().getErrMsg().toStringUtf8());
+                        LogInfo("leaveChannelResponse failed! errCode:" + leaveChannelResponse.getBaseResp().getErrCode() +
+                                ", errMsg:" + leaveChannelResponse.getBaseResp().getErrMsg().toStringUtf8());
                     }
                     break;
                 }
@@ -427,7 +439,8 @@ public class TTThread extends HandlerThread {
                     if (followUserResp.getBaseResp().getErrCode() == 0) {
                         LogInfo("follow User successfully! followed User Id:" + followUserResp.getFollowedUserId());
                     }else{
-                        LogInfo("followUser failed! errCode:" + followUserResp.getBaseResp().getErrCode() + ", errMsg:" + followUserResp.getBaseResp().getErrMsg().toStringUtf8());
+                        LogInfo("followUser failed! errCode:" + followUserResp.getBaseResp().getErrCode() +
+                                ", errMsg:" + followUserResp.getBaseResp().getErrMsg().toStringUtf8());
                     }
     //
                     break;
@@ -595,25 +608,20 @@ public class TTThread extends HandlerThread {
 
     }
 
-    public void req_new_game_channel_list(int tagId, int gameMode, int count) {
+    public void req_new_game_channel_list(int tagId, int getMode, int count) {
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
+                channels.clear();
                 write(
-                        ByteBuffer.wrap(ttProtocol.req_new_game_channel_list(tagId, gameMode, count))
+                        ByteBuffer.wrap(ttProtocol.req_new_game_channel_list(tagId, getMode, count))
                 );
             }
         });
 
     }
 
-    public void req_channel_under_mic_member_list(long displayId) {
-        String _dislayId = String.valueOf(displayId);
-        if (!this.channelIds.containsKey(Long.valueOf(_dislayId))){
-            LogInfo("ChannelId doesn't exist in the channelIds!" + _dislayId);
-            return;
-        }
-        Long channelId = this.channelIds.get(Long.valueOf(_dislayId));
+    public void req_channel_under_mic_member_list(long channelId) {
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -643,12 +651,12 @@ public class TTThread extends HandlerThread {
                 sendThread.start();
                 try {
                     int port = 8080;
-                    channel = SocketChannel.open();
+                    socketChannel = SocketChannel.open();
                     selector = Selector.open();
                     // we open this channel in non blocking mode
-                    channel.configureBlocking(false);
-                    channel.connect(new InetSocketAddress("lvs.52tt.com", port));
-                    channel.register(selector, SelectionKey.OP_CONNECT);
+                    socketChannel.configureBlocking(false);
+                    socketChannel.connect(new InetSocketAddress("lvs.52tt.com", port));
+                    socketChannel.register(selector, SelectionKey.OP_CONNECT);
                     connect(1000);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -660,13 +668,13 @@ public class TTThread extends HandlerThread {
     private void on_game_channel_list(RespNewGameChannelList channelList) {
         if (channelList.getBaseResp().getErrCode() == 0) {
             LogInfo("RespNewGameChannelList successfully! ");
-            LogInfo(channelList.toString());
-//            if (channelList.getChannelListCount() > 0) {
-//                for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
-//                    LogInfo("ChannelId:" + channel.getChannelId() + ", Name:" + channel.getChannelName().toStringUtf8());
-//                }
-//
-//            }
+            //LogInfo(channelList.toString());
+            if (channelList.getChannelListCount() > 0) {
+                for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
+                    LogInfo("ChannelId:" + channel.getChannelId() + ", Name:" + channel.getChannelName().toStringUtf8());
+                    this.channels.put(channel.getChannelId(), channel);
+                }
+            }
         }else{
             LogInfo("RespNewGameChannelList failed! errCode:" + channelList.getBaseResp().getErrCode() +
                     ", errMsg:" + channelList.getBaseResp().getErrMsg().toStringUtf8());
@@ -676,13 +684,13 @@ public class TTThread extends HandlerThread {
     private void on_game_channel_member_list(ResponseChannelUnderMicMemberList memberList) {
         if (memberList.getBaseResp().getErrCode() == 0) {
             LogInfo("ResponseChannelUnderMicMemberList successfully!");
-            LogInfo(memberList.toString());
-//            LogInfo("ChannelId:" + memberList.getChannelId() + ", MemberCount:" + memberList.getCurrMemberTotal());
-//            if (memberList.getCurrMemberTotal() > 0) {
-//                for (ResponseChannelUnderMicMemberList.ChannelMemberInfo memberInfo : memberList.getChannelMemberInfoList()) {
-//                    LogInfo("channelMemberInfo:" + memberInfo.toString());
-//                }
-//            }
+            //LogInfo(memberList.toString());
+            LogInfo("ChannelId:" + memberList.getChannelId() + ", MemberCount:" + memberList.getCurrMemberTotal());
+            if (memberList.getCurrMemberTotal() > 0) {
+                for (ResponseChannelUnderMicMemberList.ChannelMemberInfo memberInfo : memberList.getChannelMemberInfoList()) {
+                    LogInfo("   channelMember:" + memberInfo.getNickName().toStringUtf8() + ", Account:" + memberInfo.getAccount().toStringUtf8());
+                }
+            }
         }else{
             LogInfo("ResponseChannelUnderMicMemberList failed! errCode:" + memberList.getBaseResp().getErrCode() +
                     ", errMsg:" + memberList.getBaseResp().getErrMsg().toStringUtf8());
@@ -691,11 +699,11 @@ public class TTThread extends HandlerThread {
 
     public void init(Application application, String acc, String uid, String acc_type, String pwd, String deviceID,
                      String deviceIDV2, String androidid, String key_web_ua, String deviceModel){
-        this.ttProtocol = new TTProtocol("13580590620", "296475024", "1",
-                "555f6144739d62894deff36b0d0b62ec", "BW82Bo7zrUTj2zq4puKdTJMjOmOV+SqsEhkiHJlgX7MeFlSa3Ex8p+kZiabXs32rc0qkPuXHnTSD9kWlbDpFR6Q==",
-                "17b6d6731ed4f34acc0d0d8cdc202b88", "fbddc0a64a19b097",
-                "Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt",
-                "Google Pixel3 XL");
+        this.ttProtocol = new TTProtocol(acc, uid, acc_type,
+                pwd, deviceID,
+                deviceIDV2, androidid,
+                key_web_ua,
+                deviceModel);
         this.ttProtocol.init(application);
     }
 }

@@ -281,12 +281,12 @@ public class TTProtocol {
         return pack_body2(Commands.cmd_check_sync_key, checkSyncKey.toByteArray());
     }
 
-    public byte[] req_new_game_channel_list(int tagId, int gameMode, int count){
+    public byte[] req_new_game_channel_list(int tagId, int getMode, int count){
         ReqNewGameChannelList reqNewGameChannelList = ReqNewGameChannelList.newBuilder()
                 .setBaseReq(ReqNewGameChannelList.BaseReq.newBuilder())
                 .setCount(count)
                 .setTabId(tagId)
-                .setGetMode(gameMode)
+                .setGetMode(getMode)
                 .setChannelPackageId(ByteString.copyFromUtf8("official"))
                 .build();
         return pack_body2(Commands.cmd_req_game_channel_list, reqNewGameChannelList.toByteArray());

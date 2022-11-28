@@ -85,7 +85,7 @@ message ResponseChannelUnderMicMemberList{
     optional int64 uid = 2;
     optional bool isMuted = 3;
     optional bytes nickName = 4;
-    optional int32 sex = 9;
+    optional int32 sex = 9;//1 = female, 0 = male
     optional bytes faceMd5 = 16;
   }
 }

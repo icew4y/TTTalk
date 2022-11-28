@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import okhttp3.Response;
@@ -233,15 +234,21 @@ public class MainActivity extends AppCompatActivity {
         btnReqChannelList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ttThread.req_new_game_channel_list(TagIds.getId("王者荣耀"), 2, 20);
+                ttThread.req_new_game_channel_list(TagIds.getId("全房间"), 2, 20);
             }
         });
         Button btnReqMicMember = (Button) findViewById(R.id.btnReqMicMember);
         btnReqMicMember.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                ttThread.req_channel_under_mic_member_list(Long.valueOf(dislayId));
+                //String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                if (ttThread.getChannels().size() > 0) {
+                    Iterator<Map.Entry<Long, RespNewGameChannelList.ChannelList>> iterator = ttThread.getChannels().entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry<Long, RespNewGameChannelList.ChannelList> ch = iterator.next();
+                        ttThread.req_channel_under_mic_member_list(Long.valueOf(ch.getValue().getChannelId()));
+                    }
+                }
             }
         });
 
