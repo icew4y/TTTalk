@@ -69,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
                     logEdt.setText(logstr + "\n");
                     break;
                 }
+                case 2:{
+                    EditText editChannelId = (EditText) findViewById(R.id.edtResponseChannelId);
+                    editChannelId.setText((String)msg.obj);
+                    break;
+                }
                 default:break;
             }
             return false;
@@ -168,8 +173,10 @@ public class MainActivity extends AppCompatActivity {
         //----ishumei return:{"code":1100,"detail":{"deviceId":"B6nWouzehOiCoX9epMn5W0ovRA3W7PcYE\/aOcs0R9ggf9COWLNa7+t8tQL4do5gJzI3U0\/94bJjd9w1Ynlii8w=="},"requestId":"06b184412d1545fe5e713a64afc2b693"}
         //----before getPreSharedXML:73c8e35220bc684412f1bd86b04785ca.xml
         //MainActivity.this.DeviceId = "F0QbUvikXMCkKayVrQ3DtAgxB8pnIrY7/NrKaUXvw+7RH54uBLofmz0/Ft5wz35O7zctESDu15aXoRvKPFx5CQ==";
-        this.ttThread = new TTThread("TTThread");
-        this.ttThread.setApplication(getApplication());
+
+        String ck = "{\"acc\": \"13580590620\", \"uid\": \"296475024\", \"acc_type\": \"1\", \"pwd\": \"555f6144739d62894deff36b0d0b62ec\", \"deviceID\": \"BDtLXJ5ss8Df97P7qM7JMD4NMyrc+fa4Fj3q/qeLa9GmfC8K6kfiOsybHgHvslhSkECpmWQ+aHTSj6zDbef9E9A==\", \"deviceIdV2\": \"17b6d6731ed4f34acc0d0d8cdc202b88\", \"androidid\": \"fbddc0a64a19b097\", \"key_web_ua\": \"Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt\"}";
+        this.ttThread = new TTThread();
+        this.ttThread.setAccountCookie(getApplication(), ck);
         this.ttThread.start();
 
 

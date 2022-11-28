@@ -74,6 +74,14 @@
                 android:layout_height="wrap_content"
                 android:text="进入房间"
                 app:layout_constraintStart_toStartOf="parent" />
+            <EditText
+                android:id="@+id/edtResponseChannelId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                app:layout_constraintStart_toEndOf="@+id/btnEnterChannel"
+                tools:layout_editor_absoluteY="48dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -151,7 +159,7 @@
                 android:id="@+id/btnGreets"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="给房间里某人打招呼"
+                android:text="给某人打招呼"
                 app:layout_constraintStart_toStartOf="parent"/>
 
             <EditText
@@ -183,7 +191,7 @@
                 android:id="@+id/btnReqChannelList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="获取房间列表"
+                android:text="根据类别刷新获取房间"
                 app:layout_constraintStart_toStartOf="parent"/>
 
             <EditText

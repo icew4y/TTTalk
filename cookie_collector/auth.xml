@@ -3,7 +3,7 @@
     <string name="acc">13580590620</string>
     <int name="uid" value="296475024" />
     <int name="acc_type" value="1" />
-    <boolean name="auto_auth" value="false" />
+    <boolean name="auto_auth" value="true" />
     <string name="pwd">555f6144739d62894deff36b0d0b62ec</string>
     <int name="third_type" value="0" />
 </map>

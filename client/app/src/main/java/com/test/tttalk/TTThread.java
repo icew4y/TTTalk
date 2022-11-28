@@ -23,6 +23,9 @@ import com.protobuf.protos.ResponseSuperChannelSearch;
 import com.test.tttalk.protocol.TTProtocol;
 import com.yiyou.ga.net.protocol.YProtocol;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -34,13 +37,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class TTThread extends HandlerThread {
-    public Application getApplication() {
-        return application;
-    }
 
-    public void setApplication(Application application) {
-        this.application = application;
-    }
 
     private Application application;
     private String TAG = "TTTalk";
@@ -73,14 +70,46 @@ public class TTThread extends HandlerThread {
     private int stage = READING_HEADER;
     private ByteBuffer readBuffer = ByteBuffer.allocate(1480);
     private ByteBuffer tempBuffer;
-
+    private Handler handler;
     public Handler getHandler() {
         return handler;
     }
 
-    private Handler handler;
-    public TTThread(String name) {
-        super(name);
+    public Application getApplication() {
+        return application;
+    }
+
+    private void setApplication(Application application) {
+        this.application = application;
+    }
+
+    public TTThread() {
+        super("TTThread");
+    }
+
+    public void setAccountCookie(Application application, String jsonCookie) {
+        try {
+            this.setApplication(application);
+            JSONObject jsonObject = new JSONObject(jsonCookie);
+
+            String acc = jsonObject.getString("acc");
+            String uid = jsonObject.getString("uid");
+            String acc_type = jsonObject.getString("acc_type");
+            String pwd = jsonObject.getString("pwd");
+            String deviceID = jsonObject.getString("deviceID");
+            String deviceIdV2 = jsonObject.getString("deviceIdV2");
+            String androidid = jsonObject.getString("androidid");
+            String key_web_ua = jsonObject.getString("key_web_ua");
+            String deviceModel = "Google Pixel3 XL";
+
+            this.init(getApplication(),acc, uid, acc_type,
+                    pwd, deviceID,
+                    deviceIdV2, androidid,
+                    key_web_ua,
+                    deviceModel);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void LogInfo(String info) {
@@ -89,6 +118,13 @@ public class TTThread extends HandlerThread {
         msg.obj = info;
         MainActivity.getMainInstance().sendMsg(msg);
         Log.d(TAG, info);
+    }
+
+    private void setChannelId(String ChannelId) {
+        Message msg = new Message();
+        msg.what = 2;
+        msg.obj = ChannelId;
+        MainActivity.getMainInstance().sendMsg(msg);
     }
 
     public void write(ByteBuffer buffer) {
@@ -472,6 +508,7 @@ public class TTThread extends HandlerThread {
             if (responseSuperChannelSearch.getBaseResp().getErrCode() == 0) {
                 ResponseSuperChannelSearch.SearchResp.ChannelInfo channelInfo = responseSuperChannelSearch.getSearchResp().getChannelInfo();
                 this.channelIds.put(channelInfo.getDisplayId(), channelInfo.getChannelId());
+                setChannelId(String.valueOf(channelInfo.getChannelId()));
                 LogInfo("ResponseSuperChannelSearch, DisplayId:" + channelInfo.getDisplayId() + ", ChannelId:" + channelInfo.getChannelId());
             }else{
                 LogInfo("ResponseSuperChannelSearch failed! errCode:" + responseSuperChannelSearch.getBaseResp().getErrCode() +
@@ -492,11 +529,6 @@ public class TTThread extends HandlerThread {
             }
         };
 
-        this.init(getApplication(),"13580590620", "296475024", "1",
-                "555f6144739d62894deff36b0d0b62ec", "BDtLXJ5ss8Df97P7qM7JMD4NMyrc+fa4Fj3q/qeLa9GmfC8K6kfiOsybHgHvslhSkECpmWQ+aHTSj6zDbef9E9A==",
-                "17b6d6731ed4f34acc0d0d8cdc202b88", "fbddc0a64a19b097",
-                "Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt",
-                "Google Pixel3 XL");
         this.start_connect_and_work();
     }
 
@@ -525,12 +557,11 @@ public class TTThread extends HandlerThread {
     }
 
     public void enter_channel(long displayId){
-        String dislayId = String.valueOf(displayId);
-        if (!this.channelIds.containsKey(Long.valueOf(dislayId))){
-            LogInfo("ChannelId doesn't exist in the channelIds!" + dislayId);
+        if (!this.channelIds.containsKey(displayId)){
+            LogInfo("ChannelId doesn't exist in the channelIds!" + displayId);
             return;
         }
-        Long channelId = this.channelIds.get(Long.valueOf(dislayId));
+        Long channelId = this.channelIds.get(displayId);
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -543,12 +574,11 @@ public class TTThread extends HandlerThread {
     }
 
     public void leave_channel(long displayId) {
-        String dislayId = String.valueOf(displayId);
-        if (!this.channelIds.containsKey(Long.valueOf(dislayId))){
-            LogInfo("ChannelId doesn't exist in the channelIds!" + dislayId);
+        if (!this.channelIds.containsKey(displayId)){
+            LogInfo("ChannelId doesn't exist in the channelIds!" + displayId);
             return;
         }
-        Long channelId = this.channelIds.get(Long.valueOf(dislayId));
+        Long channelId = this.channelIds.get(displayId);
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
