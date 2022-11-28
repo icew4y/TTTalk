@@ -5,91 +5,244 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
 
-    <Button
-        android:id="@+id/btnLogin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="登录"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        >
 
-    <Button
-        android:id="@+id/btnGreets"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="打招呼"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnFollow" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:id="@+id/loginLayout">
 
-    <Button
-        android:id="@+id/btnLeaveRoom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="退出房间"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnEnterChannel" />
+            <Button
+                android:id="@+id/btnLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="登录"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/btnFollow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="关注"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnChatText" />
+        </LinearLayout>
 
-    <Button
-        android:id="@+id/btnChatText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="文字消息"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnLeaveRoom" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/searchLayout"
+            app:layout_constraintTop_toBottomOf="@+id/loginLayout"
+            android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btnEnterChannel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:text="进入房间"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
+            <Button
+                android:id="@+id/btnSearchChannel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="搜索房间"
+                tools:layout_editor_absoluteX="0dp" />
 
-    <Button
-        android:id="@+id/btnSearchChannel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="搜索房间"
-        app:layout_constraintBottom_toTopOf="@+id/btnEnterChannel"
-        tools:layout_editor_absoluteX="0dp" />
+            <EditText
+                android:id="@+id/edtChannelSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="158887230"
+                app:layout_constraintStart_toEndOf="@+id/btnSearchChannel"
+                tools:layout_editor_absoluteY="48dp" />
+        </LinearLayout>
 
-    <EditText
-        android:id="@+id/edtChannelSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="158887230"
-        app:layout_constraintStart_toEndOf="@+id/btnSearchChannel"
-        tools:layout_editor_absoluteY="48dp" />
+        <LinearLayout
+            android:id="@+id/enterChannelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/searchLayout"
+            tools:layout_editor_absoluteX="0dp">
 
-    <Button
-        android:id="@+id/btnReqChannelList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="获取房间列表"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnGreets" />
+            <Button
+                android:id="@+id/btnEnterChannel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="进入房间"
+                app:layout_constraintStart_toStartOf="parent" />
+        </LinearLayout>
 
-    <Button
-        android:id="@+id/btnReqMicMember"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="获取房间成员"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnReqChannelList" />
+        <LinearLayout
+            android:id="@+id/leaveChannelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/enterChannelLayout"
+            tools:layout_editor_absoluteX="0dp">
+
+            <Button
+                android:id="@+id/btnLeaveRoom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="退出房间"
+                app:layout_constraintStart_toStartOf="parent" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/publicChatLayout"
+            app:layout_constraintTop_toBottomOf="@+id/leaveChannelLayout"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnChatText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="发送公屏文字消息"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <EditText
+                android:id="@+id/edtPublichChatMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:text="Hi,there!"
+                tools:layout_editor_absoluteY="48dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/followLayout"
+            app:layout_constraintTop_toBottomOf="@+id/publicChatLayout"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/btnFollow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="关注用户"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edtAccountId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="AccountId"
+                tools:layout_editor_absoluteY="48dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+                android:id="@+id/greetingLayout"
+            app:layout_constraintTop_toBottomOf="@+id/followLayout"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/btnGreets"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="给房间里某人打招呼"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edtGreetToAccountId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="5"
+                android:hint="AccountId"
+                tools:layout_editor_absoluteY="48dp" />
+            <EditText
+                android:id="@+id/edtGreetMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="5"
+                android:hint="Message"
+                android:text="Greetings!"
+                tools:layout_editor_absoluteY="48dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/getroomsLayout"
+            app:layout_constraintTop_toBottomOf="@+id/greetingLayout"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/btnReqChannelList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="获取房间列表"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edtTagId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="TagId(全房间ID:0)"
+                android:text="0"
+                android:inputType="number"
+                tools:layout_editor_absoluteY="48dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/getmemberLayout"
+            app:layout_constraintTop_toBottomOf="@+id/getroomsLayout"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/btnReqMicMember"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="获取房间所有成员"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnReqChannelList" />
+
+            <EditText
+                android:id="@+id/edtChannelId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="必须是真实的channelId"
+                android:inputType="number"
+                tools:layout_editor_absoluteY="48dp" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/logLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toBottomOf="@+id/getmemberLayout"
+            android:orientation="horizontal">
+                <TextView
+                android:id="@+id/edtLog"
+                android:scrollbars="vertical"
+                android:inputType="textMultiLine|textCapSentences"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

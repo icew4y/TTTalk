@@ -8,14 +8,14 @@ option objc_class_prefix = "GPB";
 
 
 message EnterChannelRequest{
-  optional unknown_obj1 ub1 = 1;
+  optional BaseReq baseReq = 1;
   optional int64 roomId = 2;
 
   optional unknown_obj3 ub3 = 3;
   optional int64 displayRoomId = 5;
   optional int32 unknown_int7 = 7;
 
-  message unknown_obj1{
+  message BaseReq{
 
   }
 
@@ -35,9 +35,9 @@ message EnterChannelResponse{
 
 
 message LeaveChannelRequest{
-  optional unknown_obj1 ub1 = 1;
+  optional BaseReq baseReq = 1;
   optional int64 channelId = 2;
-  message unknown_obj1{
+  message BaseReq{
 
   }
 }

@@ -1,0 +1,10 @@
+syntax = "proto2";
+
+package com.protobuf.protos;
+option java_package = "com.protobuf.protos";
+option java_multiple_files = true;
+option objc_class_prefix = "GPB";
+
+message EmptyMessage{
+
+}

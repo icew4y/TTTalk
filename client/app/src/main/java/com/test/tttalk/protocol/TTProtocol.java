@@ -170,7 +170,7 @@ public class TTProtocol {
 
     public byte[] enter_channel(long channelId, long displayId){
         seq++;
-        EnterChannelRequest enterChannelRequest = EnterChannelRequest.newBuilder().setUb1(EnterChannelRequest.unknown_obj1.newBuilder())
+        EnterChannelRequest enterChannelRequest = EnterChannelRequest.newBuilder().setBaseReq(EnterChannelRequest.BaseReq.newBuilder())
                 .setRoomId(channelId)
                 .setUb3(EnterChannelRequest.unknown_obj3.newBuilder().setUnknownInt1(3))
                 .setDisplayRoomId(displayId)
@@ -181,7 +181,7 @@ public class TTProtocol {
 
     public byte[] leave_channel(long channelId) {
         LeaveChannelRequest.Builder leaveBuilder = LeaveChannelRequest.newBuilder()
-                .setUb1(LeaveChannelRequest.unknown_obj1.newBuilder().build())
+                .setBaseReq(LeaveChannelRequest.BaseReq.newBuilder().build())
                 .setChannelId(channelId);
 
         LeaveChannelRequest leaveChannelRequest = leaveBuilder.build();

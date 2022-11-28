@@ -10,10 +10,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.Editable;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -59,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
             switch (msg.what){
                 case 1:{
                     //Toast.makeText(getApplication(), (String)msg.obj, Toast.LENGTH_SHORT).show();
+                    TextView logEdt = (TextView) findViewById(R.id.edtLog);
+                    String logstr = logEdt.getText().toString();
+                    logstr += (String) msg.obj;
+                    logEdt.setText(logstr + "\n");
                     break;
                 }
                 default:break;
@@ -165,6 +173,10 @@ public class MainActivity extends AppCompatActivity {
         this.ttThread.start();
 
 
+        TextView logEdt = (TextView) findViewById(R.id.edtLog);
+        logEdt.setMovementMethod(new ScrollingMovementMethod());
+
+
         Button btnLogin = (Button) findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,8 +198,8 @@ public class MainActivity extends AppCompatActivity {
         btnEnterChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                ttThread.enter_channel(Long.valueOf(dislayId));
+                String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                ttThread.enter_channel(Long.valueOf(displayId));
             }
         });
 
@@ -195,8 +207,8 @@ public class MainActivity extends AppCompatActivity {
         btnLeaveChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                ttThread.leave_channel(Long.valueOf(dislayId));
+                String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                ttThread.leave_channel(Long.valueOf(displayId));
             }
         });
 
@@ -204,10 +216,10 @@ public class MainActivity extends AppCompatActivity {
         btnFollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //String displayID = "158887230";
-                //String channelID = "164351337";
-                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                ttThread.follow_user("tt317892845", Long.valueOf(dislayId), "王者荣耀");
+                //tt317892845
+                String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                String AccountId = ((EditText) findViewById(R.id.edtAccountId)).getText().toString();
+                ttThread.follow_user(AccountId, Long.valueOf(displayId), "王者荣耀");
             }
         });
 
@@ -216,8 +228,9 @@ public class MainActivity extends AppCompatActivity {
         btnChatText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                ttThread.channel_chat_text(Long.valueOf(dislayId), "Howdy, y'all!");
+                String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                String content = ((EditText) findViewById(R.id.edtPublichChatMessage)).getText().toString();
+                ttThread.channel_chat_text(Long.valueOf(displayId), content);
             }
         });
 
@@ -226,7 +239,9 @@ public class MainActivity extends AppCompatActivity {
         btnGreets.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ttThread.greet("tt317892845", "Hi! Nice to meet you! How are you doing?");
+                String greetToAccountId = ((EditText) findViewById(R.id.edtGreetToAccountId)).getText().toString();
+                String greetMessage = ((EditText) findViewById(R.id.edtGreetMessage)).getText().toString();
+                ttThread.greet(greetToAccountId, greetMessage);
             }
         });
 
@@ -234,21 +249,24 @@ public class MainActivity extends AppCompatActivity {
         btnReqChannelList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ttThread.req_new_game_channel_list(TagIds.getId("全房间"), 2, 20);
+                String edtTagId = ((EditText) findViewById(R.id.edtTagId)).getText().toString();
+                ttThread.req_new_game_channel_list(Integer.valueOf(edtTagId), 2, 20);
+                //ttThread.req_new_game_channel_list(TagIds.getId("全房间"), 2, 20);
             }
         });
         Button btnReqMicMember = (Button) findViewById(R.id.btnReqMicMember);
         btnReqMicMember.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //String dislayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                if (ttThread.getChannels().size() > 0) {
-                    Iterator<Map.Entry<Long, RespNewGameChannelList.ChannelList>> iterator = ttThread.getChannels().entrySet().iterator();
-                    while (iterator.hasNext()) {
-                        Map.Entry<Long, RespNewGameChannelList.ChannelList> ch = iterator.next();
-                        ttThread.req_channel_under_mic_member_list(Long.valueOf(ch.getValue().getChannelId()));
-                    }
-                }
+                String channelId = ((EditText) findViewById(R.id.edtChannelId)).getText().toString();
+                ttThread.req_channel_under_mic_member_list(Long.valueOf(channelId));
+//                if (ttThread.getChannels().size() > 0) {
+//                    Iterator<Map.Entry<Long, RespNewGameChannelList.ChannelList>> iterator = ttThread.getChannels().entrySet().iterator();
+//                    while (iterator.hasNext()) {
+//                        Map.Entry<Long, RespNewGameChannelList.ChannelList> ch = iterator.next();
+//                        ttThread.req_channel_under_mic_member_list(Long.valueOf(ch.getValue().getChannelId()));
+//                    }
+//                }
             }
         });
 
