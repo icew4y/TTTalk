@@ -37,7 +37,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class TTalk extends HandlerThread {
-
+    interface ICallback{
+        public void callback(Object o);
+    }
 
     private Application application;
     private String TAG = "TTTalk";
@@ -49,6 +51,13 @@ public class TTalk extends HandlerThread {
     private String loginKey = "";
     private SendThread sendThread = new SendThread("SendThread");
     private HashMap<Long, Long> channelIds = new HashMap();
+
+    public String getAccount() {
+        return account;
+    }
+
+    //TTalk account Id
+    private String account = "";
 
     public HashMap<Long, RespNewGameChannelList.ChannelList> getChannels() {
         return channels;
@@ -64,6 +73,8 @@ public class TTalk extends HandlerThread {
     private static final int FINISHED = 4;
     private static final int ERROR = 5;
 
+    private ICallback channelListCb = null;
+    private ICallback channelMemberListCb = null;
     private int bodylen;
 
     private int limitation = 16;
@@ -152,7 +163,7 @@ public class TTalk extends HandlerThread {
                     System.arraycopy(this.tempBuffer.array(), this.limitation, arr_b, 0, this.bodylen);
                     ByteBuffer byteBuffer0 = ByteBuffer.wrap(arr_b);
                     Log.d(TAG, "cmd:" + this.msghead.cmd + ", bodylen:" + this.bodylen);
-                    this.onRespose(this.msghead.cmd, byteBuffer0);
+                    this.onResponse(this.msghead.cmd, byteBuffer0);
                     this.init_buffer();
                 }
             }
@@ -361,7 +372,7 @@ public class TTalk extends HandlerThread {
         return null;
     }
 
-    private void onRespose(int cmd, ByteBuffer data) {
+    private void onResponse(int cmd, ByteBuffer data) {
         try {
             //cmd 6 should be notification
             if (cmd == 6) {
@@ -652,7 +663,19 @@ public class TTalk extends HandlerThread {
                 );
             }
         });
+    }
 
+    public void req_new_game_channel_list(int tagId, int getMode, int count, ICallback callback) {
+        this.channelListCb = callback;
+        this.sendThread.getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                channels.clear();
+                write(
+                        ByteBuffer.wrap(ttProtocol.req_new_game_channel_list(tagId, getMode, count))
+                );
+            }
+        });
     }
 
     public void req_channel_under_mic_member_list(long channelId) {
@@ -664,7 +687,18 @@ public class TTalk extends HandlerThread {
                 );
             }
         });
+    }
 
+    public void req_channel_under_mic_member_list(long channelId, ICallback callback) {
+        this.channelMemberListCb = callback;
+        this.sendThread.getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                write(
+                        ByteBuffer.wrap(ttProtocol.req_channel_under_mic_member_list(channelId))
+                );
+            }
+        });
     }
 
     public void check_sync_keys() {
@@ -705,6 +739,7 @@ public class TTalk extends HandlerThread {
             LoginResp loginResp = LoginResp.parseFrom(streamData);
             if (loginResp.getBaseResp().getErrCode() == 0){
                 LoginResp.AuthInfo authInfo = loginResp.getAuthInfo();
+                this.account = authInfo.getAccount().toStringUtf8();
                 int uid = authInfo.getUserId();
                 String sessionKey = authInfo.getSessionKey().toStringUtf8();
                 long timestamp = authInfo.getTimestamp();
@@ -734,19 +769,21 @@ public class TTalk extends HandlerThread {
     private void on_game_channel_list(byte[] streamData) {
         try {
             RespNewGameChannelList channelList = RespNewGameChannelList.parseFrom(streamData);
-            if (channelList.getBaseResp().getErrCode() == 0) {
-                LogInfo("RespNewGameChannelList successfully! ");
-                //LogInfo(channelList.toString());
-                if (channelList.getChannelListCount() > 0) {
-                    for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
-                        LogInfo("ChannelId:" + channel.getChannelId() + ", Name:" + channel.getChannelName().toStringUtf8());
-                        this.channels.put(channel.getChannelId(), channel);
-                    }
-                }
-            }else{
-                LogInfo("RespNewGameChannelList failed! errCode:" + channelList.getBaseResp().getErrCode() +
-                        ", errMsg:" + channelList.getBaseResp().getErrMsg().toStringUtf8());
-            }
+            if (this.channelListCb != null)
+                this.channelListCb.callback(channelList);
+//            if (channelList.getBaseResp().getErrCode() == 0) {
+//                LogInfo("RespNewGameChannelList successfully! ");
+//                //LogInfo(channelList.toString());
+//                if (channelList.getChannelListCount() > 0) {
+//                    for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
+//                        LogInfo("ChannelId:" + channel.getChannelId() + ", Name:" + channel.getChannelName().toStringUtf8());
+//                        this.channels.put(channel.getChannelId(), channel);
+//                    }
+//                }
+//            }else{
+//                LogInfo("RespNewGameChannelList failed! errCode:" + channelList.getBaseResp().getErrCode() +
+//                        ", errMsg:" + channelList.getBaseResp().getErrMsg().toStringUtf8());
+//            }
         } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();
         }
@@ -755,19 +792,21 @@ public class TTalk extends HandlerThread {
     private void on_game_channel_member_list(byte[] streamData) {
         try {
             ResponseChannelUnderMicMemberList memberList = ResponseChannelUnderMicMemberList.parseFrom(streamData);
-            if (memberList.getBaseResp().getErrCode() == 0) {
-                LogInfo("ResponseChannelUnderMicMemberList successfully!");
-                //LogInfo(memberList.toString());
-                LogInfo("ChannelId:" + memberList.getChannelId() + ", MemberCount:" + memberList.getCurrMemberTotal());
-                if (memberList.getCurrMemberTotal() > 0) {
-                    for (ResponseChannelUnderMicMemberList.ChannelMemberInfo memberInfo : memberList.getChannelMemberInfoList()) {
-                        LogInfo("   channelMember:" + memberInfo.getNickName().toStringUtf8() + ", Account:" + memberInfo.getAccount().toStringUtf8());
-                    }
-                }
-            }else{
-                LogInfo("ResponseChannelUnderMicMemberList failed! errCode:" + memberList.getBaseResp().getErrCode() +
-                        ", errMsg:" + memberList.getBaseResp().getErrMsg().toStringUtf8());
-            }
+            if (this.channelMemberListCb != null)
+                this.channelMemberListCb.callback(memberList);
+//            if (memberList.getBaseResp().getErrCode() == 0) {
+//                LogInfo("ResponseChannelUnderMicMemberList successfully!");
+//                //LogInfo(memberList.toString());
+//                LogInfo("ChannelId:" + memberList.getChannelId() + ", MemberCount:" + memberList.getCurrMemberTotal());
+//                if (memberList.getCurrMemberTotal() > 0) {
+//                    for (ResponseChannelUnderMicMemberList.ChannelMemberInfo memberInfo : memberList.getChannelMemberInfoList()) {
+//                        LogInfo("   channelMember:" + memberInfo.getNickName().toStringUtf8() + ", Account:" + memberInfo.getAccount().toStringUtf8());
+//                    }
+//                }
+//            }else{
+//                LogInfo("ResponseChannelUnderMicMemberList failed! errCode:" + memberList.getBaseResp().getErrCode() +
+//                        ", errMsg:" + memberList.getBaseResp().getErrMsg().toStringUtf8());
+//            }
         } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();
         }

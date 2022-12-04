@@ -217,8 +217,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="获取房间所有成员"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/btnReqChannelList" />
+                app:layout_constraintStart_toStartOf="parent" />
 
             <EditText
                 android:id="@+id/edtChannelId"
@@ -229,12 +228,45 @@
                 tools:layout_editor_absoluteY="48dp" />
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/collectUsersLayout"
+            app:layout_constraintTop_toBottomOf="@+id/getmemberLayout"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/btnStartCollect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="开始采集用户"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/sendBatchMsgLayout"
+            app:layout_constraintTop_toBottomOf="@+id/collectUsersLayout"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/btnSendBatchMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="批量发私信"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/logLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_constraintTop_toBottomOf="@+id/getmemberLayout"
+            app:layout_constraintTop_toBottomOf="@+id/sendBatchMsgLayout"
             android:orientation="horizontal">
                 <TextView
                 android:id="@+id/edtLog"
@@ -244,6 +276,7 @@
                 android:layout_height="wrap_content"/>
 
         </LinearLayout>
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

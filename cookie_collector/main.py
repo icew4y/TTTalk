@@ -12,6 +12,9 @@ if __name__ == '__main__':
         os.system('adb shell su 0 "cp /data/data/com.yiyou.ga/shared_prefs/BUGLY_COMMON_VALUES.xml /sdcard/BUGLY_COMMON_VALUES.xml"')
         os.system(
             'adb shell su 0 "cp /data/data/com.yiyou.ga/shared_prefs/73c8e35220bc684412f1bd86b04785ca.xml /sdcard/73c8e35220bc684412f1bd86b04785ca.xml"')
+
+        # if preference_new_deivce_id.xml is not showing up under 'shared_prefs' directory
+        # you must execute 'pm clear com.yiyou.ga' and login you account again.
         os.system(
             'adb shell su 0 "cp /data/data/com.yiyou.ga/shared_prefs/preference_new_deivce_id.xml /sdcard/preference_new_deivce_id.xml"')
         os.system('adb pull /sdcard/auth.xml .')
