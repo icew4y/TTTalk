@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,6 +50,11 @@ public class MainActivity extends AppCompatActivity {
     //even by a random string, Auto login still works
     public String androidid = "fbddc0a64a19b097";
     private static String TAG = "TTTalk";
+
+    public TTalk getTTalk() {
+        return TTalk;
+    }
+
     private TTalk TTalk;
 
     private void LogInfo(String info) {
@@ -141,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         return "";
     }
 
-    private DBManager dbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,9 +155,8 @@ public class MainActivity extends AppCompatActivity {
         mainInstance = this;
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        dbManager = new DBManager(this);
-        dbManager.open();
-        dbManager.insert("tt123456", "Richard", "1", "王者荣耀");
+
+        DBManager.getInstance(getApplication()).insert("tt123456", "Richard", "1", "王者荣耀");
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -309,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
                                                         //LogInfo("   channelMember:" + memberInfo.getNickName().toStringUtf8() + ", Account:" + memberInfo.getAccount().toStringUtf8());
                                                         if (TTalk.getAccount().equalsIgnoreCase(memberInfo.getAccount().toStringUtf8()))
                                                             continue;
-                                                        dbManager.insert(memberInfo.getAccount().toStringUtf8(), memberInfo.getNickName().toStringUtf8(), String.valueOf(memberInfo.getSex()), String.valueOf(memberList.getChannelId()));
+                                                        DBManager.getInstance(getApplication()).insert(memberInfo.getAccount().toStringUtf8(), memberInfo.getNickName().toStringUtf8(), String.valueOf(memberInfo.getSex()), String.valueOf(memberList.getChannelId()));
                                                     }
                                                 }
                                             }else{
@@ -334,7 +338,8 @@ public class MainActivity extends AppCompatActivity {
         btnSendBatchMsg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(MainActivity.this, BatchMessageActivity.class);
+                startActivity(intent);
             }
         });
     }

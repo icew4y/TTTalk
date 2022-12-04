@@ -44,7 +44,7 @@ public class TTalk extends HandlerThread {
     private Application application;
     private String TAG = "TTTalk";
     private int seq = 4;
-    public TTProtocol ttProtocol;
+    private TTProtocol ttProtocol;
     private SocketChannel socketChannel;
     private Selector selector;
     private boolean finishConnect = false;
