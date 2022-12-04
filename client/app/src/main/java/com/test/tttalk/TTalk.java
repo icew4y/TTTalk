@@ -48,6 +48,8 @@ public class TTalk extends HandlerThread {
     private SocketChannel socketChannel;
     private Selector selector;
     private boolean finishConnect = false;
+    private boolean isLoggedIn = false;
+    private boolean isDisconnected = false;
     private String loginKey = "";
     private SendThread sendThread = new SendThread("SendThread");
     private HashMap<Long, Long> channelIds = new HashMap();
@@ -75,6 +77,7 @@ public class TTalk extends HandlerThread {
 
     private ICallback channelListCb = null;
     private ICallback channelMemberListCb = null;
+    private ICallback greetsCb = null;
     private int bodylen;
 
     private int limitation = 16;
@@ -151,20 +154,45 @@ public class TTalk extends HandlerThread {
         SocketChannel socketChannel0 = (SocketChannel)selectionKey0.channel();
 
         try {
-            if (this.read_Head(socketChannel0) > 0) {
-                if (this.stage == READING_NEW_VERSION_HEADER) {
-                    this.read_new_version_head(socketChannel0);
+            int read = 0;
+            if (this.stage == READING_HEADER) {
+                read = this.read_Head(socketChannel0);
+            }
+            if (this.stage == READING_NEW_VERSION_HEADER) {
+                read = this.read_new_version_head(socketChannel0);
+            }
+            if (this.stage == READING_BODY) {
+                read = this.readBody(socketChannel0);
+            }
+            if (read <= 0) {
+                LogInfo("[-DEBUG] receive size <= 0, socket might be down");
+                selectionKey0.cancel();
+                socketChannel0.close();
+                if (socketChannel.isOpen() && socketChannel != null) {
+                    socketChannel.close();
                 }
-                if (this.stage == READING_BODY) {
-                    this.readBody(socketChannel0);
+                if (selector.isOpen() && selector != null) {
+                    selector.close();
                 }
-                if (this.stage == FINISHED) {
-                    byte[] arr_b = new byte[this.bodylen];
-                    System.arraycopy(this.tempBuffer.array(), this.limitation, arr_b, 0, this.bodylen);
-                    ByteBuffer byteBuffer0 = ByteBuffer.wrap(arr_b);
-                    Log.d(TAG, "cmd:" + this.msghead.cmd + ", bodylen:" + this.bodylen);
-                    this.onResponse(this.msghead.cmd, byteBuffer0);
-                    this.init_buffer();
+            }
+            if (this.stage == FINISHED) {
+                byte[] arr_b = new byte[this.bodylen];
+                System.arraycopy(this.tempBuffer.array(), this.limitation, arr_b, 0, this.bodylen);
+                ByteBuffer byteBuffer0 = ByteBuffer.wrap(arr_b);
+                Log.d(TAG, "cmd:" + this.msghead.cmd + ", bodylen:" + this.bodylen);
+                this.onResponse(this.msghead.cmd, byteBuffer0);
+                this.init_buffer();
+            }
+
+            if (this.stage == ERROR) {
+                LogInfo("[-DEBUG] Error occur, close socket");
+                selectionKey0.cancel();
+                socketChannel0.close();
+                if (socketChannel.isOpen() && socketChannel != null) {
+                    socketChannel.close();
+                }
+                if (selector.isOpen() && selector != null) {
+                    selector.close();
                 }
             }
         } catch (Exception e) {
@@ -222,6 +250,10 @@ public class TTalk extends HandlerThread {
     public final synchronized int read_Head(SocketChannel socketChannel){
         try {
             int has_read = socketChannel.read(this.readBuffer);
+            if (has_read <= 0) {
+                this.stage = ERROR;
+                return has_read;
+            }
             this.totalRead += has_read;
             if (has_read == 16) {
                 this.readBuffer.position(0);
@@ -252,6 +284,10 @@ public class TTalk extends HandlerThread {
         int has_read = 0;
         try {
             has_read = socketChannel.read(this.readBuffer);
+            if (has_read <= 0) {
+                this.stage = ERROR;
+                return has_read;
+            }
             if (has_read > 0) {
                 this.totalRead += has_read;
             }
@@ -281,6 +317,10 @@ public class TTalk extends HandlerThread {
         try {
             ByteBuffer byteBuffer0 = this.tempBuffer;
             has_read = socketChannel.read(byteBuffer0);
+            if (has_read <= 0) {
+                this.stage = ERROR;
+                return has_read;
+            }
             this.totalRead += has_read;
             if(this.totalRead >= this.msghead.tl) {
                 this.stage = this.FINISHED;
@@ -310,7 +350,7 @@ public class TTalk extends HandlerThread {
                     }
 
                     if(selectionKey0.isConnectable()) {
-                        Log.d("BaseSocket", "key isConnectable");
+                        //Log.d("BaseSocket", "key isConnectable");
                         Log.d("BaseSocket", "doConnect");
                         SocketChannel socketChannel0 = (SocketChannel)selectionKey0.channel();
                         if(!selectionKey0.isValid()) {
@@ -321,7 +361,7 @@ public class TTalk extends HandlerThread {
                         selectionKey0.interestOps(1);
                         try {
                             this.finishConnect = socketChannel0.finishConnect();
-                            Log.d(TAG, "finishConnect!");
+                            //Log.d(TAG, "finishConnect!");
                             LogInfo("Connected to lvs.52tt.com!");
                             this.init_buffer();
                             continue;
@@ -332,17 +372,17 @@ public class TTalk extends HandlerThread {
                     }
 
                     if(selectionKey0.isReadable()) {
-                        Log.d("BaseSocket", "key.isReadable");
+                        //Log.d("BaseSocket", "key.isReadable");
                         this.doReceive(selectionKey0);
                         continue;
                     }
 
                     if(selectionKey0.isWritable()) {
-                        Log.d("BaseSocket", "key.isWritable");
+                        //Log.d("BaseSocket", "key.isWritable");
                         continue;
                     }
 
-                    Log.d("BaseSocket", "key.others");
+                    //Log.d("BaseSocket", "key.others");
                 }
             }
             if(!this.finishConnect) {
@@ -435,13 +475,17 @@ public class TTalk extends HandlerThread {
 
     private void on_greetings_response(byte[] streamData) {
         try {
-            GreetingResp greetingResp = GreetingResp.parseFrom(streamData);
-            if (greetingResp.getBaseResp().getErrCode() == 0) {
-                LogInfo("Greetings message sent successfully! ");
-            }else{
-                LogInfo("Greetings message sent failed! errCode:" + greetingResp.getBaseResp().getErrCode() +
-                        ", errMsg:" + greetingResp.getBaseResp().getErrMsg().toStringUtf8());
+            if (this.greetsCb != null) {
+                GreetingResp greetingResp = GreetingResp.parseFrom(streamData);
+                this.greetsCb.callback(greetingResp);
             }
+//            GreetingResp greetingResp = GreetingResp.parseFrom(streamData);
+//            if (greetingResp.getBaseResp().getErrCode() == 0) {
+//                LogInfo("Greetings message sent successfully! ");
+//            }else{
+//                LogInfo("Greetings message sent failed! errCode:" + greetingResp.getBaseResp().getErrCode() +
+//                        ", errMsg:" + greetingResp.getBaseResp().getErrMsg().toStringUtf8());
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -650,7 +694,18 @@ public class TTalk extends HandlerThread {
                 );
             }
         });
+    }
 
+    public void greet(String toAccount, String content, ICallback callback) {
+        this.greetsCb = callback;
+        this.sendThread.getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                write(
+                        ByteBuffer.wrap(ttProtocol.greet(toAccount, content, loginKey))
+                );
+            }
+        });
     }
 
     public void req_new_game_channel_list(int tagId, int getMode, int count) {

@@ -242,6 +242,13 @@
                 android:layout_height="wrap_content"
                 android:text="开始采集用户"
                 app:layout_constraintStart_toStartOf="parent" />
+            <Button
+                android:id="@+id/btnStopCollect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="停止采集"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </LinearLayout>
 
@@ -257,7 +264,7 @@
                 android:id="@+id/btnSendBatchMsg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="批量发私信"
+                android:text="打开批量发私信窗口"
                 app:layout_constraintStart_toStartOf="parent" />
 
         </LinearLayout>

@@ -8,6 +8,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.protobuf.protos.RespNewGameChannelList;
 import com.protobuf.protos.ResponseChannelUnderMicMemberList;
@@ -30,7 +32,10 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import abhishekti7.unicorn.filepicker.UnicornFilePicker;
+import abhishekti7.unicorn.filepicker.utils.Constants;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private TTalk TTalk;
+    private AtomicBoolean isStopCollecting = new AtomicBoolean(false);
 
     private void LogInfo(String info) {
         Message msg = new Message();
@@ -80,6 +86,14 @@ public class MainActivity extends AppCompatActivity {
                 case 2:{
                     EditText editChannelId = (EditText) findViewById(R.id.edtResponseChannelId);
                     editChannelId.setText((String)msg.obj);
+                    break;
+                }
+                case 3:{
+                    Toast.makeText(getApplication(), (String)msg.obj, Toast.LENGTH_SHORT).show();
+                    TextView logEdt = (TextView) findViewById(R.id.edtLog);
+                    String logstr = logEdt.getText().toString();
+                    logstr += (String) msg.obj;
+                    logEdt.setText(logstr + "\n");
                     break;
                 }
                 default:break;
@@ -156,8 +170,21 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        DBManager.getInstance(getApplication()).insert("tt123456", "Richard", "1", "王者荣耀");
+        //测试，总监的账号
+//        DBManager.getInstance(getApplication()).insert(
+//                "tt690247533",
+//                "爱过",
+//                "1",
+//                "unknown"
+//        );
 
+        //测试，自己的账号
+//        DBManager.getInstance(getApplication()).insert(
+//                "tt317892845",
+//                "yy",
+//                "1",
+//                "unknown"
+//        );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
@@ -185,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Kill the official TTalk application before doing all of the stuff.
         // It prevents the account being pushed out from the official app.
-        String ck = "{\"acc\": \"13580590620\", \"uid\": \"296475024\", \"acc_type\": \"1\", \"pwd\": \"555f6144739d62894deff36b0d0b62ec\", \"deviceID\": \"BTRJOF6MUpAZJgJSdqqTslAVhNp1TIUaRg0UW7Nbtu9Ivc+p7h26RPtR0LWvaXuKEckV5N6fsJ099MlYFImuGwg==\", \"deviceIdV2\": \"17b6d6731ed4f34acc0d0d8cdc202b88\", \"androidid\": \"fbddc0a64a19b097\", \"key_web_ua\": \"Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt\"}";
+        String ck = "{\"acc\": \"13580590620\", \"uid\": \"296475024\", \"acc_type\": \"1\", \"pwd\": \"555f6144739d62894deff36b0d0b62ec\", \"deviceID\": \"Bly4MRdeHpsxvSDdGCT1PmlYppXHPthaIX5psHrU+rLwswyFKAgwma8K+N1l8lbSrcWbsI4kFMhuHNanFTCHyyw==\", \"deviceIdV2\": \"17b6d6731ed4f34acc0d0d8cdc202b88\", \"androidid\": \"fbddc0a64a19b097\", \"key_web_ua\": \"Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt\"}";
         this.TTalk = new TTalk();
         this.TTalk.setAccountCookie(getApplication(), ck);
         // onLooperPrepared will be called after TTalk thread is started.
@@ -288,51 +315,92 @@ public class MainActivity extends AppCompatActivity {
 //                }
             }
         });
+        btnEnterChannel.setEnabled(false);
+        btnLeaveChannel.setEnabled(false);
+        btnFollow.setEnabled(false);
+        btnChatText.setEnabled(false);
+        btnGreets.setEnabled(false);
+        btnReqChannelList.setEnabled(false);
+        btnReqMicMember.setEnabled(false);
 
         Button btnStartCollect = (Button) findViewById(R.id.btnStartCollect);
         btnStartCollect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TTalk.req_new_game_channel_list(0, 2, 10, new TTalk.ICallback() {
-                    @Override
-                    public void callback(Object o) {
-                        RespNewGameChannelList channelList = (RespNewGameChannelList)o;
-                        if (channelList.getBaseResp().getErrCode() == 0) {
-                            if (channelList.getChannelListCount() > 0) {
-                                for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
-                                    TTalk.req_channel_under_mic_member_list(channel.getChannelId(), new TTalk.ICallback() {
-                                        @Override
-                                        public void callback(Object o) {
-                                            ResponseChannelUnderMicMemberList memberList = (ResponseChannelUnderMicMemberList)o;
-                                            if (memberList.getBaseResp().getErrCode() == 0) {
+                if (!isStopCollecting.get()) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (true) {
+                                TTalk.req_new_game_channel_list(0, 2, 10, new TTalk.ICallback() {
+                                    @Override
+                                    public void callback(Object o) {
+                                        RespNewGameChannelList channelList = (RespNewGameChannelList)o;
+                                        if (channelList.getBaseResp().getErrCode() == 0) {
+                                            if (channelList.getChannelListCount() > 0) {
+                                                for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
+                                                    TTalk.req_channel_under_mic_member_list(channel.getChannelId(), new TTalk.ICallback() {
+                                                        @Override
+                                                        public void callback(Object o) {
+                                                            ResponseChannelUnderMicMemberList memberList = (ResponseChannelUnderMicMemberList)o;
+                                                            if (memberList.getBaseResp().getErrCode() == 0) {
+                                                                LogInfo("ChannelId:" + memberList.getChannelId() + ", MemberCount:" + memberList.getCurrMemberTotal());
+                                                                if (memberList.getCurrMemberTotal() > 0) {
+                                                                    for (ResponseChannelUnderMicMemberList.ChannelMemberInfo memberInfo : memberList.getChannelMemberInfoList()) {
+                                                                        //LogInfo("   channelMember:" + memberInfo.getNickName().toStringUtf8() + ", Account:" + memberInfo.getAccount().toStringUtf8());
+                                                                        if (TTalk.getAccount().equalsIgnoreCase(memberInfo.getAccount().toStringUtf8()))
+                                                                            continue;
+                                                                        DBManager.getInstance(getApplication()).insert(memberInfo.getAccount().toStringUtf8(), memberInfo.getNickName().toStringUtf8(), String.valueOf(memberInfo.getSex()), String.valueOf(memberList.getChannelId()));
+                                                                    }
 
-
-                                                LogInfo("ChannelId:" + memberList.getChannelId() + ", MemberCount:" + memberList.getCurrMemberTotal());
-                                                if (memberList.getCurrMemberTotal() > 0) {
-                                                    for (ResponseChannelUnderMicMemberList.ChannelMemberInfo memberInfo : memberList.getChannelMemberInfoList()) {
-                                                        //LogInfo("   channelMember:" + memberInfo.getNickName().toStringUtf8() + ", Account:" + memberInfo.getAccount().toStringUtf8());
-                                                        if (TTalk.getAccount().equalsIgnoreCase(memberInfo.getAccount().toStringUtf8()))
-                                                            continue;
-                                                        DBManager.getInstance(getApplication()).insert(memberInfo.getAccount().toStringUtf8(), memberInfo.getNickName().toStringUtf8(), String.valueOf(memberInfo.getSex()), String.valueOf(memberList.getChannelId()));
-                                                    }
+                                                                    //测试，每次采集完后添加一下总监的账号
+                                                                    //用于测试发私信有没有被风控
+//                                                                    DBManager.getInstance(getApplication()).insert(
+//                                                                            "tt690247533",
+//                                                                            "爱过",
+//                                                                            "1",
+//                                                                            "unknown"
+//                                                                    );
+                                                                }
+                                                            }else{
+                                                                LogInfo("ResponseChannelUnderMicMemberList failed! errCode:" + memberList.getBaseResp().getErrCode() +
+                                                                        ", errMsg:" + memberList.getBaseResp().getErrMsg().toStringUtf8());
+                                                            }
+                                                        }
+                                                    });
                                                 }
-                                            }else{
-                                                LogInfo("ResponseChannelUnderMicMemberList failed! errCode:" + memberList.getBaseResp().getErrCode() +
-                                                        ", errMsg:" + memberList.getBaseResp().getErrMsg().toStringUtf8());
                                             }
+                                        }else{
+                                            LogInfo("RespNewGameChannelList failed! errCode:" + channelList.getBaseResp().getErrCode() +
+                                                    ", errMsg:" + channelList.getBaseResp().getErrMsg().toStringUtf8());
                                         }
-                                    });
+                                    }
+                                });
+                                try {
+                                    Thread.sleep(2000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+
+                                if (isStopCollecting.get()) {
+                                    LogInfo("停止采集成功！");
+                                    isStopCollecting.set(false);
+                                    break;
                                 }
                             }
-                        }else{
-                            LogInfo("RespNewGameChannelList failed! errCode:" + channelList.getBaseResp().getErrCode() +
-                                    ", errMsg:" + channelList.getBaseResp().getErrMsg().toStringUtf8());
                         }
-                    }
-                });
+                    }).start();
+                }
             }
         });
 
+        Button btnStopCollect = (Button) findViewById(R.id.btnStopCollect);
+        btnStopCollect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isStopCollecting.set(true);
+            }
+        });
 
         Button btnSendBatchMsg = (Button) findViewById(R.id.btnSendBatchMsg);
         btnSendBatchMsg.setOnClickListener(new View.OnClickListener() {

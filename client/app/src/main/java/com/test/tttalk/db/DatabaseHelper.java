@@ -18,7 +18,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String SEX = "Sex";
 
     // Database Information
-    static final String DB_NAME = "JOURNALDEV_users.DB";
+    static final String DB_NAME = "database_users.DB";
 
     // database version
     static final int DB_VERSION = 1;
