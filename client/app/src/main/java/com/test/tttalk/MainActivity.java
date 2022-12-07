@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.protobuf.protos.FollowUserResp;
 import com.protobuf.protos.RespNewGameChannelList;
 import com.protobuf.protos.ResponseChannelUnderMicMemberList;
 import com.test.tttalk.databinding.ActivityMainBinding;
@@ -253,8 +254,9 @@ public class MainActivity extends AppCompatActivity {
         btnLeaveChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
-                TTalk.leave_channel(Long.valueOf(displayId));
+                //String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                String channelId = ((EditText) findViewById(R.id.edtChannelId)).getText().toString();
+                TTalk.leave_channel(Long.valueOf(channelId));
             }
         });
 
@@ -265,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                 //tt317892845
                 String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
                 String AccountId = ((EditText) findViewById(R.id.edtAccountId)).getText().toString();
-                TTalk.follow_user(AccountId, Long.valueOf(displayId), "王者荣耀");
+                //TTalk.follow_user(AccountId, Long.valueOf(displayId), "王者荣耀");
             }
         });
 
@@ -274,9 +276,10 @@ public class MainActivity extends AppCompatActivity {
         btnChatText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
+                //String displayId = ((EditText) findViewById(R.id.edtChannelSearch)).getText().toString();
                 String content = ((EditText) findViewById(R.id.edtPublichChatMessage)).getText().toString();
-                TTalk.channel_chat_text(Long.valueOf(displayId), content);
+                String channelId = ((EditText) findViewById(R.id.edtChannelId)).getText().toString();
+                TTalk.channel_chat_text(Long.valueOf(channelId), content);
             }
         });
 
@@ -315,8 +318,8 @@ public class MainActivity extends AppCompatActivity {
 //                }
             }
         });
-        btnEnterChannel.setEnabled(false);
-        btnLeaveChannel.setEnabled(false);
+        //btnEnterChannel.setEnabled(false);
+        //btnLeaveChannel.setEnabled(false);
         btnFollow.setEnabled(false);
         btnChatText.setEnabled(false);
         btnGreets.setEnabled(false);
@@ -350,7 +353,20 @@ public class MainActivity extends AppCompatActivity {
                                                                         //LogInfo("   channelMember:" + memberInfo.getNickName().toStringUtf8() + ", Account:" + memberInfo.getAccount().toStringUtf8());
                                                                         if (TTalk.getAccount().equalsIgnoreCase(memberInfo.getAccount().toStringUtf8()))
                                                                             continue;
-                                                                        DBManager.getInstance(getApplication()).insert(memberInfo.getAccount().toStringUtf8(), memberInfo.getNickName().toStringUtf8(), String.valueOf(memberInfo.getSex()), String.valueOf(memberList.getChannelId()));
+                                                                        //DBManager.getInstance(getApplication()).insert(memberInfo.getAccount().toStringUtf8(), memberInfo.getNickName().toStringUtf8(), String.valueOf(memberInfo.getSex()), String.valueOf(memberList.getChannelId()));
+                                                                        String ttAccount = memberInfo.getAccount().toStringUtf8();
+                                                                        TTalk.follow_user(ttAccount,
+                                                                                memberList.getChannelId(), "", new TTalk.ICallback() {
+                                                                                    @Override
+                                                                                    public void callback(Object o) {
+                                                                                        FollowUserResp followUserResp = (FollowUserResp)o;
+                                                                                        if (followUserResp.getBaseResp().getErrCode() == 0) {
+                                                                                            LogInfo("关注成功:" + ttAccount);
+                                                                                        }else{
+                                                                                            LogInfo("关注失败:" + ttAccount + ", " + memberList.getBaseResp().getErrMsg().toStringUtf8());
+                                                                                        }
+                                                                                    }
+                                                                                });
                                                                     }
 
                                                                     //测试，每次采集完后添加一下总监的账号
@@ -407,6 +423,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, BatchMessageActivity.class);
+                startActivity(intent);
+            }
+        });
+        Button btnSendChannelMsg = (Button) findViewById(R.id.btnSendChannelMsg);
+        btnSendChannelMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, ChannelMessageActivity.class);
                 startActivity(intent);
             }
         });

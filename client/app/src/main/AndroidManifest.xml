@@ -41,6 +41,10 @@
         <activity android:name=".BatchMessageActivity"
             android:exported="true">
         </activity>
+        <activity android:name=".ChannelMessageActivity"
+            android:exported="true">
+
+        </activity>
     </application>
 
 </manifest>

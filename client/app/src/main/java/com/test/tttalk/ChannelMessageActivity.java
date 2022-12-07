@@ -18,40 +18,40 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.protobuf.protos.ChatMessageResp;
 import com.protobuf.protos.GreetingResp;
+import com.protobuf.protos.RespNewGameChannelList;
+import com.protobuf.protos.ResponseChannelUnderMicMemberList;
 import com.test.tttalk.db.DBManager;
 
 import java.io.IOException;
-import java.io.PipedReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import abhishekti7.unicorn.filepicker.UnicornFilePicker;
 import abhishekti7.unicorn.filepicker.utils.Constants;
 
-public class BatchMessageActivity extends AppCompatActivity {
-    private String TAG = "BatchMessageActivity";
+public class ChannelMessageActivity extends AppCompatActivity {
+    private String TAG = "ChannelMessageActivity";
 
-    private Button btnSelectMsgFile, btnSendBatchMsgs, btnStopBatchMsgs;
+    private static ChannelMessageActivity channelMessageInstance = null;
+    public static ChannelMessageActivity getInstance() {
+        return channelMessageInstance;
+    }
+
+    private AtomicBoolean isStopSending = new AtomicBoolean(false);
+
     private TextView textFilePath;
     private String filePath = "";
     private ArrayList<String> messages = new ArrayList<>();
 
     private final static int msg_log = 1;
     private final static int msg_toast = 2;
-    private final static int msg_need_sent = 3;
-    private final static int msg_sent = 4;
-
-    private AtomicBoolean isStopSending = new AtomicBoolean(false);
-
-    private static BatchMessageActivity batchMessageInstance = null;
-    public static BatchMessageActivity getInstance() {
-        return batchMessageInstance;
-    }
-
+    private final static int msg_sent_suc = 3;
+    private final static int msg_sent_failed = 4;
     public void sendMsg(Message msg) {
         this.messageHandler.sendMessage(msg);
     }
@@ -59,8 +59,16 @@ public class BatchMessageActivity extends AppCompatActivity {
         Message msg = new Message();
         msg.what = cmd;
         msg.obj = info;
-        BatchMessageActivity.getInstance().sendMsg(msg);
+        ChannelMessageActivity.getInstance().sendMsg(msg);
         Log.d(TAG, info);
+    }
+
+    public void sleep(long millsecond) {
+        try {
+            Thread.sleep(millsecond);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private Handler messageHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
@@ -83,12 +91,18 @@ public class BatchMessageActivity extends AppCompatActivity {
                     logEdt.setText(logstr + "\n");
                     break;
                 }
-                case msg_need_sent:{
-                    ((TextView) findViewById(R.id.textNeedSendNum)).setText((String) msg.obj);
+                case msg_sent_suc:{
+                    TextView textView = ((TextView) findViewById(R.id.textSentNum));
+                    int num = Integer.parseInt(textView.getText().toString());
+                    num = num + 1;
+                    textView.setText(String.valueOf(num));
                     break;
                 }
-                case msg_sent:{
-                    ((TextView) findViewById(R.id.textSentNum)).setText((String) msg.obj);
+                case msg_sent_failed:{
+                    TextView textView = ((TextView) findViewById(R.id.textSentFailure));
+                    int num = Integer.parseInt(textView.getText().toString());
+                    num = num + 1;
+                    textView.setText(String.valueOf(num));
                     break;
                 }
                 default:break;
@@ -97,7 +111,7 @@ public class BatchMessageActivity extends AppCompatActivity {
         }
     });
 
-    public BatchMessageActivity() {
+    public ChannelMessageActivity() {
         super();
     }
 
@@ -118,18 +132,18 @@ public class BatchMessageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_batchmessage);
-        batchMessageInstance = this;
+        setContentView(R.layout.activity_channelmessage);
+        channelMessageInstance = this;
 
-        long count = DBManager.getInstance(getApplication()).count();
-        ((TextView)findViewById(R.id.txtCurrentNumber)).setText(String.valueOf(count));
         textFilePath = (TextView) findViewById(R.id.textFilePath);
+        ((TextView) findViewById(R.id.textSentNum)).setText("0");
+        ((TextView) findViewById(R.id.textSentFailure)).setText("0");
 
-        btnSelectMsgFile = (Button) findViewById(R.id.btnSelectMsgFile);
+        Button btnSelectMsgFile = (Button) findViewById(R.id.btnSelectMsgFile);
         btnSelectMsgFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                UnicornFilePicker.from(BatchMessageActivity.this)
+                UnicornFilePicker.from(ChannelMessageActivity.this)
                         .addConfigBuilder()
                         .selectMultipleFiles(false)
                         .showOnlyDirectory(false)
@@ -142,8 +156,8 @@ public class BatchMessageActivity extends AppCompatActivity {
             }
         });
 
-        btnSendBatchMsgs = (Button) findViewById(R.id.btnSendBatchMsgs);
-        btnSendBatchMsgs.setOnClickListener(new View.OnClickListener() {
+        Button btnSendChannelMsgs = (Button) findViewById(R.id.btnSendChannelMsgs);
+        btnSendChannelMsgs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int interval = Integer.parseInt(((EditText) findViewById(R.id.edtSendInterval)).getText().toString()) * 1000;
@@ -171,36 +185,70 @@ public class BatchMessageActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             LogInfo("开始发送消息！", msg_toast);
-                            Cursor fetch = DBManager.getInstance(getApplication())
-                                    .fetch();
-                            LogInfo(fetch.getCount() + "", msg_need_sent);
-                            int count = 0;
-                            for (fetch.moveToFirst(); !fetch.isAfterLast(); fetch.moveToNext()){
-                                String ttAccount = fetch.getString(1);
-                                //System.out.println(account);
-                                Random random = new Random();
-                                random.setSeed(System.currentTimeMillis());
-                                int i = random.nextInt(messages.size());
-                                String content = messages.get(i);
-                                MainActivity.getMainInstance().getTTalk().greet(ttAccount, content, new TTalk.ICallback() {
+                            while (true) {
+
+
+
+                                AtomicBoolean isDoneRound = new AtomicBoolean(false);
+
+                                List<Long> channelIds = new ArrayList<>();
+                                channelIds.clear();
+
+                                MainActivity.getMainInstance().getTTalk().req_new_game_channel_list(0, 2, 10, new TTalk.ICallback() {
                                     @Override
                                     public void callback(Object o) {
-                                        GreetingResp greetingResp = (GreetingResp)o;
-                                        if (greetingResp.getBaseResp().getErrCode() == 0) {
-                                            LogInfo("私信成功! " + ttAccount, msg_log);
+                                        RespNewGameChannelList channelList = (RespNewGameChannelList)o;
+                                        if (channelList.getBaseResp().getErrCode() == 0) {
+                                            if (channelList.getChannelListCount() > 0) {
+                                                for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
+                                                    channelIds.add(channel.getChannelId());
+                                                }
+
+                                            }
                                         }else{
-                                            LogInfo("私信失败:" + ttAccount + "," + greetingResp.getBaseResp().getErrCode() +
-                                                    ", 错误信息:" + greetingResp.getBaseResp().getErrMsg().toStringUtf8(), msg_log);
+                                            LogInfo("获取直播间失败! errCode:" + channelList.getBaseResp().getErrCode() +
+                                                    ", errMsg:" + channelList.getBaseResp().getErrMsg().toStringUtf8(), msg_log);
                                         }
+                                        isDoneRound.set(true);
                                     }
                                 });
-                                count ++;
-                                LogInfo(count + "", msg_sent);
-                                try {
-                                    Thread.sleep(interval);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
+
+                                while (!isDoneRound.get()) {
+                                    sleep(1000);
                                 }
+                                LogInfo("获取直播间返回，数量:" + channelIds.size(), msg_log);
+
+                                for (long channelId : channelIds) {
+                                    //EnterChannel
+                                    MainActivity.getMainInstance().getTTalk().enter_channel(channelId);
+                                    sleep(2000);
+                                    Random random = new Random();
+                                    random.setSeed(System.currentTimeMillis());
+                                    int i = random.nextInt(messages.size());
+                                    String content = messages.get(i);
+                                    MainActivity.getMainInstance().getTTalk().channel_chat_text(channelId, content, new TTalk.ICallback() {
+                                        @Override
+                                        public void callback(Object o) {
+                                            ChatMessageResp chatMessageResp = (ChatMessageResp)o;
+                                            if (chatMessageResp.getBaseResp().getErrCode() == 0) {
+                                                LogInfo("直播间消息发送成功: 房间ID:" + channelId + ", 内容:" + content, msg_log);
+                                                LogInfo("", msg_sent_suc);
+                                            }else{
+                                                LogInfo("直播间消息发送失败:" + channelId + "," + chatMessageResp.getBaseResp().getErrCode() +
+                                                        ", 错误信息:" + chatMessageResp.getBaseResp().getErrMsg().toStringUtf8(), msg_log);
+                                                LogInfo("", msg_sent_failed);
+                                            }
+                                        }
+                                    });
+                                    sleep(1500);
+                                    MainActivity.getMainInstance().getTTalk().leave_channel(channelId);
+                                    sleep(1000);
+
+                                    if (isStopSending.get()) {
+                                        break;
+                                    }
+                                }
+                                sleep(interval);
                                 //退出线程
                                 if (isStopSending.get()) {
                                     LogInfo("停止发送成功！", msg_toast);
@@ -216,8 +264,8 @@ public class BatchMessageActivity extends AppCompatActivity {
             }
         });
 
-        btnStopBatchMsgs = (Button) findViewById(R.id.btnStopBatchMsgs);
-        btnStopBatchMsgs.setOnClickListener(new View.OnClickListener() {
+        Button btnStopChannelMsgs = (Button) findViewById(R.id.btnStopChannelMsgs);
+        btnStopChannelMsgs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 isStopSending.set(true);

@@ -78,6 +78,8 @@ public class TTalk extends HandlerThread {
     private ICallback channelListCb = null;
     private ICallback channelMemberListCb = null;
     private ICallback greetsCb = null;
+    private ICallback publicChatCb = null;
+    private ICallback followCb = null;
     private int bodylen;
 
     private int limitation = 16;
@@ -494,12 +496,15 @@ public class TTalk extends HandlerThread {
     private void on_follow_user_response(byte[] streamData) {
         try {
             FollowUserResp followUserResp = FollowUserResp.parseFrom(streamData);
-            if (followUserResp.getBaseResp().getErrCode() == 0) {
-                LogInfo("follow User successfully! followed User Id:" + followUserResp.getFollowedUserId());
-            }else{
-                LogInfo("followUser failed! errCode:" + followUserResp.getBaseResp().getErrCode() +
-                        ", errMsg:" + followUserResp.getBaseResp().getErrMsg().toStringUtf8());
+            if (this.followCb != null) {
+                this.followCb.callback(followUserResp);
             }
+//            if (followUserResp.getBaseResp().getErrCode() == 0) {
+//                LogInfo("follow User successfully! followed User Id:" + followUserResp.getFollowedUserId());
+//            }else{
+//                LogInfo("followUser failed! errCode:" + followUserResp.getBaseResp().getErrCode() +
+//                        ", errMsg:" + followUserResp.getBaseResp().getErrMsg().toStringUtf8());
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -521,13 +526,16 @@ public class TTalk extends HandlerThread {
 
     private void on_public_chat_reponse(byte[] streamData) {
         try {
-            ChatMessageResp chatMessageResp = ChatMessageResp.parseFrom(streamData);
-            if (chatMessageResp.getBaseResp().getErrCode() == 0) {
-                LogInfo("ChatMessage message sent successfully! ");
-            }else{
-                LogInfo("ChatMessage message sent failed! errCode:" + chatMessageResp.getBaseResp().getErrCode() +
-                        ", errMsg:" + chatMessageResp.getBaseResp().getErrMsg().toStringUtf8());
+            if (this.publicChatCb != null) {
+                ChatMessageResp chatMessageResp = ChatMessageResp.parseFrom(streamData);
+                this.publicChatCb.callback(chatMessageResp);
             }
+//            if (chatMessageResp.getBaseResp().getErrCode() == 0) {
+//                LogInfo("ChatMessage message sent successfully! ");
+//            }else{
+//                LogInfo("ChatMessage message sent failed! errCode:" + chatMessageResp.getBaseResp().getErrCode() +
+//                        ", errMsg:" + chatMessageResp.getBaseResp().getErrMsg().toStringUtf8());
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -615,29 +623,37 @@ public class TTalk extends HandlerThread {
 
     }
 
-    public void enter_channel(long displayId){
-        if (!this.channelIds.containsKey(displayId)){
-            LogInfo("ChannelId doesn't exist in the channelIds!" + displayId);
-            return;
-        }
-        Long channelId = this.channelIds.get(displayId);
+    public void enter_channel(long channelId){
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
                 write(
-                        ByteBuffer.wrap(ttProtocol.enter_channel(channelId, displayId))
+                        ByteBuffer.wrap(ttProtocol.enter_channel(channelId, 0))
                 );
             }
         });
-
     }
 
-    public void leave_channel(long displayId) {
-        if (!this.channelIds.containsKey(displayId)){
-            LogInfo("ChannelId doesn't exist in the channelIds!" + displayId);
-            return;
-        }
-        Long channelId = this.channelIds.get(displayId);
+
+
+//    public void leave_channel(long displayId) {
+//        if (!this.channelIds.containsKey(displayId)){
+//            LogInfo("ChannelId doesn't exist in the channelIds!" + displayId);
+//            return;
+//        }
+//        Long channelId = this.channelIds.get(displayId);
+//        this.sendThread.getHandler().post(new Runnable() {
+//            @Override
+//            public void run() {
+//                write(
+//                        ByteBuffer.wrap(ttProtocol.leave_channel(channelId))
+//                );
+//            }
+//        });
+//
+//    }
+
+    public void leave_channel(long channelId) {
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -649,31 +665,56 @@ public class TTalk extends HandlerThread {
 
     }
 
-    public void follow_user(String followUserAccount, long displayId, String tagName) {
-        String _dislayId = String.valueOf(displayId);
-        if (!this.channelIds.containsKey(Long.valueOf(_dislayId))){
-            LogInfo("ChannelId doesn't exist in the channelIds!" + _dislayId);
-            return;
-        }
-        Long channelId = this.channelIds.get(Long.valueOf(_dislayId));
+//    public void follow_user(String followUserAccount, long displayId, String tagName) {
+//        String _dislayId = String.valueOf(displayId);
+//        if (!this.channelIds.containsKey(Long.valueOf(_dislayId))){
+//            LogInfo("ChannelId doesn't exist in the channelIds!" + _dislayId);
+//            return;
+//        }
+//        Long channelId = this.channelIds.get(Long.valueOf(_dislayId));
+//        this.sendThread.getHandler().post(new Runnable() {
+//            @Override
+//            public void run() {
+//                write(
+//                        ByteBuffer.wrap(ttProtocol.follow_user(followUserAccount, channelId, displayId, tagName))
+//                );
+//            }
+//        });
+//
+//    }
+
+    public void follow_user(String followUserAccount, long channelId, String tagName, ICallback callback) {
+        if (this.followCb == null)
+            this.followCb = callback;
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
                 write(
-                        ByteBuffer.wrap(ttProtocol.follow_user(followUserAccount, channelId, displayId, tagName))
+                        ByteBuffer.wrap(ttProtocol.follow_user(followUserAccount, channelId, 0, tagName))
                 );
             }
         });
 
     }
 
-    public void channel_chat_text(long displayId, String content) {
-        String _dislayId = String.valueOf(displayId);
-        if (!this.channelIds.containsKey(Long.valueOf(_dislayId))){
-            LogInfo("ChannelId doesn't exist in the channelIds!" + _dislayId);
-            return;
-        }
-        Long channelId = this.channelIds.get(Long.valueOf(_dislayId));
+//    public void channel_chat_text(long displayId, String content) {
+//        String _dislayId = String.valueOf(displayId);
+//        if (!this.channelIds.containsKey(Long.valueOf(_dislayId))){
+//            LogInfo("ChannelId doesn't exist in the channelIds!" + _dislayId);
+//            return;
+//        }
+//        Long channelId = this.channelIds.get(Long.valueOf(_dislayId));
+//        this.sendThread.getHandler().post(new Runnable() {
+//            @Override
+//            public void run() {
+//                write(
+//                        ByteBuffer.wrap(ttProtocol.channel_chat_text(channelId, content))
+//                );
+//            }
+//        });
+//    }
+
+    public void channel_chat_text(long channelId, String content) {
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -682,7 +723,19 @@ public class TTalk extends HandlerThread {
                 );
             }
         });
+    }
 
+    public void channel_chat_text(long channelId, String content, ICallback callback) {
+        if (this.publicChatCb == null)
+            this.publicChatCb = callback;
+        this.sendThread.getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                write(
+                        ByteBuffer.wrap(ttProtocol.channel_chat_text(channelId, content))
+                );
+            }
+        });
     }
 
     public void greet(String toAccount, String content) {
@@ -697,7 +750,8 @@ public class TTalk extends HandlerThread {
     }
 
     public void greet(String toAccount, String content, ICallback callback) {
-        this.greetsCb = callback;
+        if (this.greetsCb == null)
+            this.greetsCb = callback;
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -721,7 +775,8 @@ public class TTalk extends HandlerThread {
     }
 
     public void req_new_game_channel_list(int tagId, int getMode, int count, ICallback callback) {
-        this.channelListCb = callback;
+        if (this.channelListCb == null)
+            this.channelListCb = callback;
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -745,7 +800,8 @@ public class TTalk extends HandlerThread {
     }
 
     public void req_channel_under_mic_member_list(long channelId, ICallback callback) {
-        this.channelMemberListCb = callback;
+        if (this.channelMemberListCb == null)
+            this.channelMemberListCb = callback;
         this.sendThread.getHandler().post(new Runnable() {
             @Override
             public void run() {

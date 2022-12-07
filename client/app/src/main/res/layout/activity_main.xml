@@ -240,14 +240,14 @@
                 android:id="@+id/btnStartCollect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="开始采集用户"
+                android:text="批量关注"
                 app:layout_constraintStart_toStartOf="parent" />
             <Button
                 android:id="@+id/btnStopCollect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
-                android:text="停止采集"
+                android:text="停止关注"
                 app:layout_constraintStart_toStartOf="parent" />
 
         </LinearLayout>
@@ -264,9 +264,15 @@
                 android:id="@+id/btnSendBatchMsg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="打开批量发私信窗口"
+                android:text="批量发私信"
                 app:layout_constraintStart_toStartOf="parent" />
-
+            <Button
+                android:id="@+id/btnSendChannelMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="批量直播间消息"
+                app:layout_constraintStart_toStartOf="parent" />
         </LinearLayout>
 
         <LinearLayout
