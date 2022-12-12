@@ -527,6 +527,7 @@ public class TTalk extends HandlerThread {
     private void on_public_chat_reponse(byte[] streamData) {
         try {
             if (this.publicChatCb != null) {
+                System.out.println(ByteHexStr.bytetoHexString_(streamData));
                 ChatMessageResp chatMessageResp = ChatMessageResp.parseFrom(streamData);
                 this.publicChatCb.callback(chatMessageResp);
             }

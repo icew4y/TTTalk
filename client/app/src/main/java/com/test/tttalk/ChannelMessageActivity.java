@@ -129,6 +129,17 @@ public class ChannelMessageActivity extends AppCompatActivity {
         }
     }
 
+    public AtomicBoolean getIsDoneRound() {
+        return isDoneRound;
+    }
+
+    private AtomicBoolean isDoneRound = new AtomicBoolean(false);
+
+    public List<Long> getRespChannelIds() {
+        return RespChannelIds;
+    }
+
+    private List<Long> RespChannelIds = new ArrayList<>();
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -188,11 +199,7 @@ public class ChannelMessageActivity extends AppCompatActivity {
                             while (true) {
 
 
-
-                                AtomicBoolean isDoneRound = new AtomicBoolean(false);
-
-                                List<Long> channelIds = new ArrayList<>();
-                                channelIds.clear();
+                                ChannelMessageActivity.getInstance().getRespChannelIds().clear();
 
                                 MainActivity.getMainInstance().getTTalk().req_new_game_channel_list(0, 2, 10, new TTalk.ICallback() {
                                     @Override
@@ -201,7 +208,7 @@ public class ChannelMessageActivity extends AppCompatActivity {
                                         if (channelList.getBaseResp().getErrCode() == 0) {
                                             if (channelList.getChannelListCount() > 0) {
                                                 for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
-                                                    channelIds.add(channel.getChannelId());
+                                                    ChannelMessageActivity.getInstance().getRespChannelIds().add(channel.getChannelId());
                                                 }
 
                                             }
@@ -209,16 +216,21 @@ public class ChannelMessageActivity extends AppCompatActivity {
                                             LogInfo("获取直播间失败! errCode:" + channelList.getBaseResp().getErrCode() +
                                                     ", errMsg:" + channelList.getBaseResp().getErrMsg().toStringUtf8(), msg_log);
                                         }
-                                        isDoneRound.set(true);
+                                        ChannelMessageActivity.getInstance().getIsDoneRound().set(true);
                                     }
                                 });
 
-                                while (!isDoneRound.get()) {
+                                int count = 20;
+                                while (!ChannelMessageActivity.getInstance().getIsDoneRound().get()) {
                                     sleep(1000);
+                                    count --;
+                                    if (count >= 20) {
+                                        break;
+                                    }
                                 }
-                                LogInfo("获取直播间返回，数量:" + channelIds.size(), msg_log);
+                                LogInfo("获取直播间返回，数量:" + ChannelMessageActivity.getInstance().getRespChannelIds().size(), msg_log);
 
-                                for (long channelId : channelIds) {
+                                for (long channelId : ChannelMessageActivity.getInstance().getRespChannelIds()) {
                                     //EnterChannel
                                     MainActivity.getMainInstance().getTTalk().enter_channel(channelId);
                                     sleep(2000);
@@ -226,15 +238,16 @@ public class ChannelMessageActivity extends AppCompatActivity {
                                     random.setSeed(System.currentTimeMillis());
                                     int i = random.nextInt(messages.size());
                                     String content = messages.get(i);
+                                    LogInfo("直播间消息: 房间ID:" + channelId + ", 内容:" + content, msg_log);
                                     MainActivity.getMainInstance().getTTalk().channel_chat_text(channelId, content, new TTalk.ICallback() {
                                         @Override
                                         public void callback(Object o) {
                                             ChatMessageResp chatMessageResp = (ChatMessageResp)o;
                                             if (chatMessageResp.getBaseResp().getErrCode() == 0) {
-                                                LogInfo("直播间消息发送成功: 房间ID:" + channelId + ", 内容:" + content, msg_log);
+                                                LogInfo("直播间消息发送成功!", msg_log);
                                                 LogInfo("", msg_sent_suc);
                                             }else{
-                                                LogInfo("直播间消息发送失败:" + channelId + "," + chatMessageResp.getBaseResp().getErrCode() +
+                                                LogInfo("直播间消息发送失败:" + chatMessageResp.getBaseResp().getErrCode() +
                                                         ", 错误信息:" + chatMessageResp.getBaseResp().getErrMsg().toStringUtf8(), msg_log);
                                                 LogInfo("", msg_sent_failed);
                                             }

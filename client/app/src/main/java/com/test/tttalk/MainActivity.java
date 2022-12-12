@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Kill the official TTalk application before doing all of the stuff.
         // It prevents the account being pushed out from the official app.
-        String ck = "{\"acc\": \"13580590620\", \"uid\": \"296475024\", \"acc_type\": \"1\", \"pwd\": \"555f6144739d62894deff36b0d0b62ec\", \"deviceID\": \"Bly4MRdeHpsxvSDdGCT1PmlYppXHPthaIX5psHrU+rLwswyFKAgwma8K+N1l8lbSrcWbsI4kFMhuHNanFTCHyyw==\", \"deviceIdV2\": \"17b6d6731ed4f34acc0d0d8cdc202b88\", \"androidid\": \"fbddc0a64a19b097\", \"key_web_ua\": \"Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt\"}";
+        String ck = "{\"acc\": \"13580590620\", \"uid\": \"296475024\", \"acc_type\": \"1\", \"pwd\": \"555f6144739d62894deff36b0d0b62ec\", \"deviceID\": \"Be5zINckgWOuEMRC5ilCnc8WWd4BIRZvSzWqDlXFP9k924Hm6eRGho9KQYxS6ta52Zcs2MHG2QH+r5FwVDstNow==\", \"deviceIdV2\": \"17b6d6731ed4f34acc0d0d8cdc202b88\", \"androidid\": \"fbddc0a64a19b097\", \"key_web_ua\": \"Mozilla/5.0 (Linux; Android 10; AOSP on crosshatch Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.186 Mobile Safari/537.36 TTVersion/6.10.1 TTFrom/tt\"}";
         this.TTalk = new TTalk();
         this.TTalk.setAccountCookie(getApplication(), ck);
         // onLooperPrepared will be called after TTalk thread is started.
