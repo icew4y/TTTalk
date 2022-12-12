@@ -129,17 +129,7 @@ public class ChannelMessageActivity extends AppCompatActivity {
         }
     }
 
-    public AtomicBoolean getIsDoneRound() {
-        return isDoneRound;
-    }
 
-    private AtomicBoolean isDoneRound = new AtomicBoolean(false);
-
-    public List<Long> getRespChannelIds() {
-        return RespChannelIds;
-    }
-
-    private List<Long> RespChannelIds = new ArrayList<>();
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -192,45 +182,46 @@ public class ChannelMessageActivity extends AppCompatActivity {
                         LogInfo("发送的消息数量不能为0!", msg_toast);
                         return;
                     }
+                    List<Long> RespChannelIds = new ArrayList<>();
+                    AtomicBoolean isDoneRound = new AtomicBoolean(false);
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
                             LogInfo("开始发送消息！", msg_toast);
                             while (true) {
 
-
-                                ChannelMessageActivity.getInstance().getRespChannelIds().clear();
-
+                                isDoneRound.set(false);
+                                LogInfo("获取直播间...", msg_log);
                                 MainActivity.getMainInstance().getTTalk().req_new_game_channel_list(0, 2, 10, new TTalk.ICallback() {
                                     @Override
                                     public void callback(Object o) {
+                                        LogInfo("RespNewGameChannelList callback", msg_log);
                                         RespNewGameChannelList channelList = (RespNewGameChannelList)o;
                                         if (channelList.getBaseResp().getErrCode() == 0) {
-                                            if (channelList.getChannelListCount() > 0) {
-                                                for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
-                                                    ChannelMessageActivity.getInstance().getRespChannelIds().add(channel.getChannelId());
-                                                }
-
+                                            LogInfo("channelList.getBaseResp().getErrCode == 0", msg_log);
+                                            for (RespNewGameChannelList.ChannelList channel : channelList.getChannelListList()){
+                                                RespChannelIds.add(channel.getChannelId());
                                             }
                                         }else{
                                             LogInfo("获取直播间失败! errCode:" + channelList.getBaseResp().getErrCode() +
                                                     ", errMsg:" + channelList.getBaseResp().getErrMsg().toStringUtf8(), msg_log);
                                         }
-                                        ChannelMessageActivity.getInstance().getIsDoneRound().set(true);
+                                        isDoneRound.set(true);
                                     }
                                 });
 
                                 int count = 20;
-                                while (!ChannelMessageActivity.getInstance().getIsDoneRound().get()) {
+                                while (!isDoneRound.get()) {
+                                    LogInfo("isDoneRound.get()", msg_log);
                                     sleep(1000);
                                     count --;
                                     if (count >= 20) {
                                         break;
                                     }
                                 }
-                                LogInfo("获取直播间返回，数量:" + ChannelMessageActivity.getInstance().getRespChannelIds().size(), msg_log);
+                                LogInfo("获取直播间返回，数量:" + RespChannelIds.size(), msg_log);
 
-                                for (long channelId : ChannelMessageActivity.getInstance().getRespChannelIds()) {
+                                for (long channelId : RespChannelIds) {
                                     //EnterChannel
                                     MainActivity.getMainInstance().getTTalk().enter_channel(channelId);
                                     sleep(2000);
@@ -253,15 +244,16 @@ public class ChannelMessageActivity extends AppCompatActivity {
                                             }
                                         }
                                     });
-                                    sleep(1500);
+                                    sleep(800);
                                     MainActivity.getMainInstance().getTTalk().leave_channel(channelId);
-                                    sleep(1000);
+                                    sleep(800);
 
                                     if (isStopSending.get()) {
                                         break;
                                     }
                                 }
                                 sleep(interval);
+                                RespChannelIds.clear();
                                 //退出线程
                                 if (isStopSending.get()) {
                                     LogInfo("停止发送成功！", msg_toast);
